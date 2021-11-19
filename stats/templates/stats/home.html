@@ -1,0 +1,27 @@
+{% extends "stats/base.html" %}
+{% load static %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="row">
+        {% for game in Games %}
+            <div class="col-12 col-lg-6" style="margin-bottom: 30px;">
+                <div class="card mx-auto" style="width: 300px;">
+                    <img class="card-img-top" src="{{game.image.url}}" alt="Card image">
+                    <div class="card-body">
+                        <h4 class="card-title">{{game.title}}</h4>
+                        <p class="card-text">{{game.company.name}}</p>
+                        <a href="{% url 'stats-game' slug=game.slug %}" class="btn btn-primary">See Results</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <div class="row mb-3">
+            <div class="col text-center">
+                <a href="{% url 'stats-newgame' %}" class="btn btn-primary">Create New Game</a>
+            </div>
+        </div>
+    {% else %}
+        
+    {% endif %}
+{% endblock content %}
