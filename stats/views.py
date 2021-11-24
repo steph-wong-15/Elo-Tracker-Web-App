@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import GameRegisterForm
 from .models import Game
+from .forms import AddResultsForm
+from .models import Match
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -34,4 +36,18 @@ class GameDetailView(DetailView,LoginRequiredMixin):
 
 #result also needs slug
 def results(request):
-    return render(request, 'stats/results.html')
+    if request.method == 'POST':
+        form = AddResultsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Your match results were added!')
+            return redirect('stats-home')
+    else:
+        form = AddResultsForm()
+    return render(request, 'stats/results.html',{'form': form})
+
+class ResultsDetailView(DetailView, LoginRequiredMixin):
+    context_object_name = 'results_detail'
+    template_name = 'stats/results.html' 
+    model = Match
+    slug_url_kwarg = 'slug'

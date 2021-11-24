@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from datetime import date
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
@@ -28,7 +29,11 @@ class Match(models.Model):
     score_B = models.IntegerField(null = True)
     elo_change = models.IntegerField(null = True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
-    match_date = models.DateTimeField(default=timezone.now)
+    match_date = models.DateField(default = date.today)
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.game, allow_unicode=True)
+        return super(Match, self).save(*args, **kwargs)
+
 
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)
