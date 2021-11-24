@@ -22,19 +22,18 @@ class Game(models.Model):
         return super(Game, self).save(*args, **kwargs)
 
 class Match(models.Model):
-    participant_A = models.ForeignKey(Player, on_delete=models.CASCADE)
-    participant_B = models.ForeignKey(Player, on_delete=models.CASCADE)
-
-    score_A = models.IntegerField(max_length=10)
-    score_B = models.IntegerField(max_length=10)
-    elo_change = models.IntegerField(max_length=20)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    participant_A = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='participant_A', null = True)
+    participant_B = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='participant_B', null = True)
+    score_A = models.IntegerField(null = True)
+    score_B = models.IntegerField(null = True)
+    elo_change = models.IntegerField(null = True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
     match_date = models.DateTimeField(default=timezone.now)
 
-# class Results(models.Model):
-#     date_posted = models.DateTimeField(default=timezone.now)
-#     score = models.BooleanField
-#     match = models.ForeignKey(Match, on_delete=models.CASCADE, null = True)
+class Results(models.Model):
+    date_posted = models.DateTimeField(default=timezone.now)
+    score = models.BooleanField
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, null = True)
 
 # class GamePlayer(models.Model):
 #     game = models.ForeignKey(Game, on_delete=models.CASCADE)
