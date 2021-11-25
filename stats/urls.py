@@ -6,5 +6,6 @@ urlpatterns = [
     path('about/', views.about, name='stats-about'),
     path('newgame/', views.newgame, name='stats-newgame'),
     path('game/<slug:slug>/', views.GameDetailView.as_view(), name='stats-game'),
+    path('game/<slug:slug>/leaderboard/', views.LeaderBoardList.as_view(), name='test'),
     path('results/', views.results, name='stats-results')
 ]

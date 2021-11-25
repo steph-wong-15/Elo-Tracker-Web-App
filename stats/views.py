@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import GameRegisterForm
-from .models import Game
+from .models import Game, Player
 from .forms import AddResultsForm
 from .models import Match
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.list import ListView
 
 def home(request):
     Games = Game.objects.all()
@@ -51,3 +52,23 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
     template_name = 'stats/results.html' 
     model = Match
     slug_url_kwarg = 'slug'
+
+
+class LeaderBoardList(ListView, LoginRequiredMixin):
+
+    model = Player
+    #context_object_name = 'player_list'
+    template_name = 'stats/leaderboard.html'
+    slug_url_kwarg = 'slug'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'title': "Leaderboard",
+        }
+        kwargs.update(context)
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        return Player.objects.order_by('last_name')
+
+    
