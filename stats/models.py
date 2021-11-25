@@ -6,7 +6,8 @@ from django.utils.text import slugify
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
-
+    admins = models.ManyToManyField(User)
+    
 class Player(models.Model):
     first_name = models.CharField(max_length=50)
     last_name =  models.CharField(max_length=50)
