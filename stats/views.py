@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm
 from .models import Company, Game,Match
+from users.models import User
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -55,7 +56,8 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
 @login_required
 def company(request):
     company = request.user.profile.company
-    context = {'company': company}
+    users = User.objects.all().filter(company = company)
+    context = {'company': company,'users':users}
 
     return render(request, 'stats/company.html',context)
 

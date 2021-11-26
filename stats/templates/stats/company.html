@@ -7,9 +7,16 @@
                 <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
                 <div class="media-body">
                     <h2 class="account-heading">{{ company.name }}</h2>
-                    <p class="text-secondary">{{ company.admin }}</p>
+                    <p class="text-secondary">admin: {{ company.admins.username }}</p>
+                    <h6>users registered: {{users|length}} </h6>
+                    <ul>
+                    {% for user in users %} 
+                    <li>{{user}}</li>
+                    {% endfor %}
+                    </ul>
                 </div>
             </div>
+
     {% else %}
     <div class="row mb-3">
         <div class="col text-center">
