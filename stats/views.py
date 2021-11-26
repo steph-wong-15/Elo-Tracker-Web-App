@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm
-from .models import Game,Match
+from .models import Company, Game,Match
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     Games = Game.objects.all()
@@ -51,15 +52,21 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
     slug_url_kwarg = 'slug'
 
 
+@login_required
+def company(request):
+    company = request.user.profile.company
+    context = {'company': company}
 
-
+    return render(request, 'stats/company.html',context)
 
 def createCompany(request):
     if request.method == 'POST':
         form = CreateCompanyForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Your game has been created!')
+            company = form.save()
+            request.user.profile.company=company
+            request.user.save()
+            messages.success(request, f'Your company has been created!')
             return redirect('stats-home')
     else:
         form = CreateCompanyForm()

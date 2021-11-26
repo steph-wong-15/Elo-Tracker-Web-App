@@ -1,0 +1,22 @@
+{% extends "stats/base.html" %}
+{% load static %}
+{% block content %}
+<div class="content-section">
+    {%if company %}
+            <div class="media">
+                <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
+                <div class="media-body">
+                    <h2 class="account-heading">{{ company.name }}</h2>
+                    <p class="text-secondary">{{ company.admin }}</p>
+                </div>
+            </div>
+    {% else %}
+    <div class="row mb-3">
+        <div class="col text-center">
+            <h2>You are not registered with a company</h2>
+            <a href="{% url 'stats-createCompany' %}" class="btn btn-primary">Create New Company</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

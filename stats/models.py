@@ -6,8 +6,10 @@ from django.utils.text import slugify
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
-    admins = models.ManyToManyField(User)
-    
+    admins = models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+
+    def __str__(self):
+        return f'{self.name}'
 class Player(models.Model):
     first_name = models.CharField(max_length=50)
     last_name =  models.CharField(max_length=50)
@@ -41,10 +43,7 @@ class Results(models.Model):
     score = models.BooleanField
     match = models.ForeignKey(Match, on_delete=models.CASCADE, null = True)
 
-# class GamePlayer(models.Model):
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-#     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-#     player = models.ForeignKey(User, on_delete=models.CASCADE)
+
 
     
 
