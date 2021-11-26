@@ -1,9 +1,17 @@
 {% extends "stats/base.html" %}
 {% load static %}
 {% block content %}
+
     {% if user.is_authenticated %}
-        <div class="row">
+        <h2>Data are hard coded, will update implementation soon</h2>
+        <div class="row mb-3">
+            <div class="col text-center">
+                <a href="{% url 'stats-newgame' %}" class="btn btn-primary">Create New Game</a>
+            </div>
+        </div>
+        <div class="row" display="flex">
         {% for game in Games %}
+        <a href="{% url 'stats-home-update' game.title %}">
             <div class="col-12 col-lg-6" style="margin-bottom: 30px;">
                 <div class="card mx-auto" style="width: 300px;">
                     <img class="card-img-top" src="{{game.image.url}}" alt="Card image">
@@ -14,14 +22,66 @@
                     </div>
                 </div>
             </div>
+            </a>
         {% endfor %}
         </div>
-        <div class="row mb-3">
-            <div class="col text-center">
-                <a href="{% url 'stats-newgame' %}" class="btn btn-primary">Create New Game</a>
-            </div>
-        </div>
     {% else %}
-        
+        <div>
+            <h1>Welcome to Elo Tracker</h1>
+            <p>Matchmaking rating tracker for office games</p>
+        </div>
     {% endif %}
 {% endblock content %}
+{% block leaderboard %}
+<div class="content-section">
+    <h3>Leaderboard</h3>
+{% if Leaders|length > 0 %}
+
+        <p class='text-muted'>Top 3 players for {{ GameType }}
+            <ul class="list-group">
+            {% for player in Leaders %}
+                <li class="list-group-item list-group-item-light">{{player.first_name}} {{player.last_name}}</li> 
+            {% endfor %}
+            </ul>
+        </p>
+
+{% else %}
+    <p class='text-muted'>No records found</p>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block content_right %}
+            <div class="content-section">
+                <h3>Company Recent Matches</h3>
+                {% if Histories|length > 0 %}
+                    {% for match in Histories %}
+                            <p class='text-muted list-group-item'>{{ match.title }} {{ match.match_date}}
+                                <ul class="list-group">
+                                    {% for player in match.players %}
+                                        <li class="list-group-item-light">{{ player.first_name }} {{ player.last_name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </p>
+                    {% endfor %}
+                {% else %}
+                    <p class='text-muted'>No records found</p>
+                {% endif %}
+            </div>
+            <div class="content-section">
+                <h3>Company Upcomings</h3>
+                {% if Upcomings|length > 0 %}
+                    {% for match in Upcomings %}
+                            <p class='text-muted list-group-item'>{{ match.title }} {{ match.match_date}}
+                                <ul class="list-group">
+                                    {% for player in match.players %}
+                                        <li class="list-group-item-light">player.first_name player.last_name</li>
+                                    {% endfor %}
+                                </ul>
+                            </p>
+                    {% endfor %}
+                {% else %}
+                    <p class='text-muted'>No records found</p>
+                {% endif %}
+            </div>
+{% endblock %}
