@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm
-from .models import Company, Game,Match
+from .models import Company, Game, Match, Player
 from users.models import User
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
