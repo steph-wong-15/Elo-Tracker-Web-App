@@ -30,10 +30,11 @@ class Match(models.Model):
     elo_change = models.IntegerField(null = True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
     match_date = models.DateField(default = date.today)
+    slug = models.SlugField(max_length=50, null=True)
+    
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.game, allow_unicode=True)
+        self.slug = slugify(self.id, allow_unicode=True)
         return super(Match, self).save(*args, **kwargs)
-
 
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)
