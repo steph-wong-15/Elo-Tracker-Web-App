@@ -72,3 +72,6 @@ class LeaderBoardList(ListView, LoginRequiredMixin):
         return Player.objects.order_by('last_name')
 
     
+class PlayerDetailView(DetailView, LoginRequiredMixin):
+    model = Player
+    template_name = 'stats/player/'
