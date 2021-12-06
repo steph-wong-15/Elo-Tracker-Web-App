@@ -1,0 +1,12 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-web
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/code:ro
+    environment:
+      DJANGO_MODE: devel # look at os.environ['DJANGO_MODE'] to detect deployment
