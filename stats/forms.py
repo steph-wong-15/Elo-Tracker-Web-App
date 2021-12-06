@@ -5,7 +5,7 @@ from .models import Company, Game,Match
 class GameRegisterForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['title', 'company']
+        fields = ['title', 'company', 'image']
 
 class AddResultsForm(forms.ModelForm):
     class Meta:

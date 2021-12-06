@@ -9,12 +9,65 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
 
-def home(request):
-    Games = Game.objects.all()
-
-    context = {'Games': Games}
-
+def homeUpdate(request, gameType):
+    # Games = Game.objects.filter(company=request.user.company.id) #will filter for games within the company
+    Games = [
+        {
+            "title":"Basketball",
+            "slug":"basketball",
+            "image":{
+                "url":'/media/game_default.png'
+            },
+            "company":{
+                "name":"CompanyA"
+            }
+        },
+        {
+            "title":"Soccer",
+            "slug":"soccer",
+            "image":{
+                "url":'/media/game_default.png'
+            },
+            "company":{
+                "name":"CompanyA"
+            }
+        },
+        {
+            "title":"Tennis",
+            "slug":"tennis",
+            "image":{
+                "url":'/media/game_default.png'
+            },
+            "company":{
+                "name":"CompanyA"
+            }
+        }
+    ]
+    Leaders = Player.objects.order_by('id')
+    Histories = [
+        {"title":"Soccer","match_date":"2021-11-15"},
+        {"title":"Tennis","match_date":"2021-11-12"},
+        {"title":"Soccer","match_date":"2021-11-11"},
+        {"title":"Tennis","match_date":"2021-11-10"},
+        {"title":"basketball","match_date":"2021-11-01"},
+    ]
+    Upcomings = [
+        {"title":"basketball","match_date":"2021-12-01"},
+        {"title":"basketball","match_date":"2021-12-02"},
+        {"title":"Soccer","match_date":"2021-12-03"},
+        {"title":"Tennis","match_date":"2021-12-04"},
+        {"title":"Tennis","match_date":"2021-12-05"},
+    ]
+    Leaders = [
+            {"first_name":gameType+"1","last_name":"last1"},
+            {"first_name":gameType+"2","last_name":"last2"},
+            {"first_name":gameType+"3","last_name":"last3"},
+    ]     
+    context = {'Games': Games, 'Histories': Histories, 'Upcomings':Upcomings, 'Leaders':Leaders, 'GameType':gameType}
     return render(request, 'stats/home.html',context)
+
+def home(request):
+    return redirect('stats-home-update', gameType='default')
 
 def about(request):
     return render(request, 'stats/about.html')
