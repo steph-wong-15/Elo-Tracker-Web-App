@@ -6,6 +6,10 @@ from django.utils.text import slugify
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
+    admins = models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+
+    def __str__(self):
+        return f'{self.name}'
 
 class Player(models.Model):
     first_name = models.CharField(max_length=50)
@@ -23,35 +27,19 @@ class Game(models.Model):
         return super(Game, self).save(*args, **kwargs)
 
 class Match(models.Model):
-    participant_A = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='participant_A', null = True)
-    participant_B = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='participant_B', null = True)
+    participant_A = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_A', null = True)
+    participant_B = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_B', null = True)
     score_A = models.IntegerField(null = True)
     score_B = models.IntegerField(null = True)
     elo_change = models.IntegerField(null = True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
     match_date = models.DateField(default = date.today)
-    slug = models.SlugField(max_length=50, null=True)
-    
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.id, allow_unicode=True)
+        self.slug = slugify(self.pk, allow_unicode=True)
         return super(Match, self).save(*args, **kwargs)
+
 
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)
     score = models.BooleanField
     match = models.ForeignKey(Match, on_delete=models.CASCADE, null = True)
-
-# class GamePlayer(models.Model):
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-#     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-#     player = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    
-
-    
-
-
-
-
-
-
