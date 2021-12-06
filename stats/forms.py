@@ -18,5 +18,6 @@ class CreateCompanyForm(forms.ModelForm):
         model = Company
         fields = ['name','admins',]
 
-
+class companyInviteForm(forms.Form):
+    inviteCode = forms.CharField(label="Invite Code",max_length=32,required=True)
 
