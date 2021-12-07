@@ -43,6 +43,14 @@ class Results(models.Model):
     score = models.BooleanField
     match = models.ForeignKey(Match, on_delete=models.CASCADE, null = True)
 
+class Upcoming(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
+    date = models.DateField(default = date.today)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    participant_A = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_A', null = True)
+    participant_B = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_B', null = True)
+
 
 
     

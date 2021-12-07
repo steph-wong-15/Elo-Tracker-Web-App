@@ -1,0 +1,50 @@
+{% extends "stats/base.html" %}
+{% block content %}
+
+    {% if user.is_authenticated %}
+        <div class="row mb-3">
+            <div class="col text-left">
+                <a href="{% url 'stats-newmatch' %}" class="btn btn-primary">Schedule a Match</a>
+            </div>
+        </div>
+        <div align='center'>
+        <style type="text/css">
+            td {
+              padding: 0 20px;
+            }
+            tr.header{
+                background-color: #96D4D4;
+                padding: 25px 50px 75px 100px;
+            }
+            table{
+                border: 5px solid white;
+            }
+        </style>
+
+        <table>
+            <tr class='header'>
+                <th>Match Up</th>
+                <th>Game</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+            </tr>
+        {% for upcoming in upcomings %}
+            <tr>
+                <td>{{upcoming.participant_A}}  VS {{upcoming.participant_B}}</td>
+                <td>{{upcoming.game.title}}</td>
+                <td>{{upcoming.date}}</td>
+                <td>{{upcoming.start_time}}</td>
+                <td>{{upcoming.end_time}}</td>
+            </tr>
+        {% endfor %}
+
+        </table>
+        </div>
+    {% else %}
+        <div>
+            <h1>Welcome to Elo Tracker</h1>
+            <p>Login to view schedules</p>
+        </div>
+    {% endif %}
+{% endblock content %}

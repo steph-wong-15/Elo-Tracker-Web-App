@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm
-from .models import Company, Game, Match, Player
+from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
+from .models import Company, Game, Match, Player, Upcoming
 from users.models import User
 from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
@@ -127,3 +128,22 @@ def createCompany(request):
         form = CreateCompanyForm()
     return render(request, 'stats/createCompany.html', {'form': form})
 
+def schedule(request):
+    return render(request, 'stats/schedule.html')
+
+def newmatch(request):
+    if request.method == 'POST':
+        form = AddUpcomingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Your match has been scheduled!')
+            return redirect('stats-schedule')
+    else:
+        form = AddUpcomingForm()
+    return render(request, 'stats/newmatch.html', {'form': form})
+
+class UpcomingList(ListView):
+    model = Upcoming
+    template_name = 'stats/schedule.html'
+    context_object_name = 'upcomings'
+    ordering = ['date','start_time']
