@@ -10,7 +10,7 @@
         <div align='center'>
         <style type="text/css">
             td {
-              padding: 0 20px;
+              padding: 0 10px;
             }
             tr.header{
                 background-color: #96D4D4;
@@ -18,6 +18,7 @@
             }
             table{
                 border: 5px solid white;
+                border-collapse: separate;
             }
         </style>
 
@@ -28,14 +29,17 @@
                 <th>Date</th>
                 <th>Start Time</th>
                 <th>End Time</th>
+                <th></th>
             </tr>
         {% for upcoming in upcomings %}
             <tr>
-                <td>{{upcoming.participant_A}}  VS {{upcoming.participant_B}}</td>
+                <td>{{upcoming.player_1}}  VS {{upcoming.player_2}}</td>
                 <td>{{upcoming.game.title}}</td>
                 <td>{{upcoming.date}}</td>
                 <td>{{upcoming.start_time}}</td>
                 <td>{{upcoming.end_time}}</td>
+                <td><a href="{% url 'stats-upcoming' upcoming.id %}" class="btn btn-primary">View</a>
+                </td>
             </tr>
         {% endfor %}
 

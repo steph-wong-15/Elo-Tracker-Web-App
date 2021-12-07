@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from stats.views import UpcomingList
+from stats.views import UpcomingList, UpcomingDetailView
 
 urlpatterns = [
     path('', views.home, name='stats-home'),
@@ -12,6 +12,6 @@ urlpatterns = [
     path('createCompany/', views.createCompany, name='stats-createCompany'),
     path('company/', views.company, name='stats-company'),
     path('schedule/', views.UpcomingList.as_view(), name='stats-schedule'),
-    path('newmatch/', views.newmatch, name='stats-newmatch'),
-
+    path('schedule/new/', views.newmatch, name='stats-newmatch'),
+    path('schedule/<pk>/', views.UpcomingDetailView.as_view(), name='stats-upcoming')
 ]

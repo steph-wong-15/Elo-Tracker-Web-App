@@ -26,8 +26,8 @@ class Game(models.Model):
         return super(Game, self).save(*args, **kwargs)
 
 class Match(models.Model):
-    participant_A = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='participant_A', null = True)
-    participant_B = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='participant_B', null = True)
+    player_A = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_A', null = True)
+    player_B = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_B', null = True)
     score_A = models.IntegerField(null = True)
     score_B = models.IntegerField(null = True)
     elo_change = models.IntegerField(null = True)
@@ -48,10 +48,13 @@ class Upcoming(models.Model):
     date = models.DateField(default = date.today)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    participant_A = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_A', null = True)
-    participant_B = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_B', null = True)
+    player_1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_1', null = True)
+    player_2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_2', null = True)
 
-
+    def __str__(self):
+        return self.title
+    def get_absolute_url(self):
+        return reverse('stats-upcoming', kwargs={'pk': self.pk})
 
     
 

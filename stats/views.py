@@ -4,7 +4,7 @@ from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomin
 from .models import Company, Game, Match, Player, Upcoming
 from users.models import User
 from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
+from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
@@ -142,8 +142,12 @@ def newmatch(request):
         form = AddUpcomingForm()
     return render(request, 'stats/newmatch.html', {'form': form})
 
-class UpcomingList(ListView):
+class UpcomingList(ListView,LoginRequiredMixin):
     model = Upcoming
     template_name = 'stats/schedule.html'
     context_object_name = 'upcomings'
     ordering = ['date','start_time']
+
+class UpcomingDetailView(DetailView,LoginRequiredMixin):
+    model = Upcoming
+    template_name = 'stats/upcoming.html'

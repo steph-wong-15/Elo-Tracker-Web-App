@@ -1,0 +1,33 @@
+{% extends "stats/base.html" %}
+{% block content %}
+    <div class="content-section">
+        <style type="text/css">
+            td {
+              padding: 0 20px;
+            }
+            tr.header{
+                background-color: #96D4D4;
+                padding: 25px 50px 75px 100px;
+            }
+            table{
+                border: 5px solid white;
+            }
+        </style>
+        <table>
+            <tr class='header'>
+                <th>Match Up</th>
+                <th>Game</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+            </tr>
+            <tr>
+                <td>{{object.player_1}}  VS {{object.player_2}}</td>
+                <td>{{object.game.title}}</td>
+                <td>{{object.date}}</td>
+                <td>{{object.start_time}}</td>
+                <td>{{object.end_time}}</td>
+            </tr>
+        </table>
+    </div>
+{% endblock content %}
