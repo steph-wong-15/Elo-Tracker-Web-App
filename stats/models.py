@@ -10,6 +10,7 @@ class Company(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
 class Player(models.Model):
     first_name = models.CharField(max_length=50)
     last_name =  models.CharField(max_length=50)
@@ -36,7 +37,6 @@ class Match(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.game, allow_unicode=True)
         return super(Match, self).save(*args, **kwargs)
-
 
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)
