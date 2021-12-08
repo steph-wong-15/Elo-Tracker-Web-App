@@ -31,7 +31,8 @@ class Match(models.Model):
     player_B = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_B', null = True)
     score_A = models.IntegerField(null = True)
     score_B = models.IntegerField(null = True)
-    elo_change = models.IntegerField(null = True)
+    elo_A = models.IntegerField(null = True)
+    elo_B = models.IntegerField(null = True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
     match_date = models.DateField(default = date.today)
     def save(self, *args, **kwargs):

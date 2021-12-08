@@ -9,7 +9,7 @@ from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
-from trueskill import Rating, rate_1vs1
+from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
     Games = Game.objects.all()
@@ -40,6 +40,10 @@ class GameDetailView(DetailView,LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super(GameDetailView, self).get_context_data(**kwargs)
         context['Matches'] = Match.objects.filter(game=self.get_object())
+        if EloRating.objects.filter(player=self.request.user.id, game=self.get_object()).exists():
+            context['EloRating'] = EloRating.objects.get(player=self.request.user.id, game=self.get_object())
+        else:
+            context['EloRating'] = None
         return context
 
 def results(request, **kwargs):
@@ -48,11 +52,14 @@ def results(request, **kwargs):
 
     if request.method == 'POST':
         form = AddResultsForm(request.POST)
-        form.instance.game = game
 
         if form.is_valid():
             player_A = EloRating.objects.get(player = form.cleaned_data['player_A'], game = game)
             player_B = EloRating.objects.get(player = form.cleaned_data['player_B'], game = game)
+
+            form.instance.game = game
+            form.instance.elo_A = expose(Rating(mu=player_A.mu, sigma=player_A.sigma))
+            form.instance.elo_B = expose(Rating(mu=player_B.mu, sigma=player_B.sigma))
 
             if form.cleaned_data['score_A'] == form.cleaned_data['score_B']:
                 newElo_A, newElo_B = rate_1vs1(Rating(mu=player_A.mu, sigma=player_A.sigma), Rating(mu=player_B.mu, sigma=player_B.sigma), drawn=True)
@@ -127,6 +134,7 @@ class UpcomingDetailView(DetailView,LoginRequiredMixin):
     template_name = 'stats/upcoming.html'
 
 def joinGame(request, **kwargs):
+    setup(mu=1000, sigma=333.333, tau=3.33333, beta=166.666)  
     slug = kwargs['slug']
     game = Game.objects.filter(slug=slug)[0]
 
@@ -136,7 +144,7 @@ def joinGame(request, **kwargs):
         rating = EloRating()
         rating.player = request.user
         rating.game = game
-        rating.mu, rating.sigma = Rating()
+        rating.mu, rating.sigma = Rating(1000)
         rating.save()
 
     return redirect('stats-home')
