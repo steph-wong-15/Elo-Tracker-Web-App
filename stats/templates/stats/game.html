@@ -10,5 +10,29 @@
                 <a href="{% url 'stats-results' slug=game_detail.slug %}" class="btn btn-primary">Add Result</a>
             </div>
         </div>
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Game #</th>
+                        <th scope="col">Player 1</th>
+                        <th scope="col">Player 2</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in Matches %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ match.player_A }}</td>
+                        <td>{{ match.player_B }}</td>
+                        <td>{{ match.score_A }} - {{ match.score_B }}</td>
+                        <td>{{ match.match_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock content %}

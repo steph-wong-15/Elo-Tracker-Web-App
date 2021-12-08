@@ -37,13 +37,19 @@ class GameDetailView(DetailView,LoginRequiredMixin):
     model = Game
     slug_url_kwarg = 'slug'
 
+    def get_context_data(self, **kwargs):
+        context = super(GameDetailView, self).get_context_data(**kwargs)
+        context['Matches'] = Match.objects.filter(game=self.get_object())
+        return context
+
 def results(request, **kwargs):
     slug = kwargs['slug']
-    game = Game.objects.filter(slug=slug)[0]
+    game = Game.objects.get(slug=slug)
 
     if request.method == 'POST':
         form = AddResultsForm(request.POST)
-        form.initial['game'] = game
+        form.instance.game = game
+
         if form.is_valid():
             player_A = EloRating.objects.get(player = form.cleaned_data['player_A'], game = game)
             player_B = EloRating.objects.get(player = form.cleaned_data['player_B'], game = game)
