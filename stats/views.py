@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils.timezone import get_default_timezone_name
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
-from .models import Company, Game, Match, Player, Upcoming
+from .models import Company, Game, Match, Player, Upcoming, EloRating
 from users.models import User
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+
+from trueskill import Rating, rate_1vs1
 
 def home(request):
     Games = Game.objects.all()
@@ -34,11 +37,30 @@ class GameDetailView(DetailView,LoginRequiredMixin):
     model = Game
     slug_url_kwarg = 'slug'
 
-#result also needs slug
-def results(request):
+def results(request, **kwargs):
+    slug = kwargs['slug']
+    game = Game.objects.filter(slug=slug)[0]
+
     if request.method == 'POST':
         form = AddResultsForm(request.POST)
+        form.initial['game'] = game
         if form.is_valid():
+            player_A = EloRating.objects.get(player = form.cleaned_data['player_A'], game = game)
+            player_B = EloRating.objects.get(player = form.cleaned_data['player_B'], game = game)
+
+            if form.cleaned_data['score_A'] == form.cleaned_data['score_B']:
+                newElo_A, newElo_B = rate_1vs1(Rating(mu=player_A.mu, sigma=player_A.sigma), Rating(mu=player_B.mu, sigma=player_B.sigma), drawn=True)
+                
+            elif form.cleaned_data['score_A'] > form.cleaned_data['score_B']:
+                newElo_A, newElo_B = rate_1vs1(Rating(mu=player_A.mu, sigma=player_A.sigma), Rating(mu=player_B.mu, sigma=player_B.sigma))
+            else:
+                newElo_B, newElo_A = rate_1vs1(Rating(mu=player_B.mu, sigma=player_B.sigma), Rating(mu=player_A.mu, sigma=player_A.sigma))
+            
+            player_A.mu, player_A.sigma = newElo_A
+            player_B.mu, player_B.sigma = newElo_B
+            player_A.save()
+            player_B.save()
+
             form.save()
             messages.success(request, f'Your match results were added!')
             return redirect('stats-home')
@@ -97,3 +119,18 @@ class UpcomingList(ListView,LoginRequiredMixin):
 class UpcomingDetailView(DetailView,LoginRequiredMixin):
     model = Upcoming
     template_name = 'stats/upcoming.html'
+
+def joinGame(request, **kwargs):
+    slug = kwargs['slug']
+    game = Game.objects.filter(slug=slug)[0]
+
+    if EloRating.objects.filter(player=request.user.id, game=game).exists():
+        print('jh')
+    else:
+        rating = EloRating()
+        rating.player = request.user
+        rating.game = game
+        rating.mu, rating.sigma = Rating()
+        rating.save()
+
+    return redirect('stats-home')

@@ -38,6 +38,12 @@ class Match(models.Model):
         self.slug = slugify(self.game, allow_unicode=True)
         return super(Match, self).save(*args, **kwargs)
 
+class EloRating(models.Model):
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
+    mu = models.FloatField(null = True)
+    sigma = models.FloatField(null = True)
+
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)
     score = models.BooleanField

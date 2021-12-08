@@ -6,8 +6,8 @@
                 <h2>{{game_detail.title}}</h2>
             </div>
             <div class="col-6 text-right">
-                <a href="{% url 'stats-results' %}" class="btn btn-primary">Join Game</a>
-                <a href="{% url 'stats-results' %}" class="btn btn-primary">Add Result</a>
+                <a href="{% url 'stats-joingame' slug=game_detail.slug %}" class="btn btn-primary">Join Game</a>
+                <a href="{% url 'stats-results' slug=game_detail.slug %}" class="btn btn-primary">Add Result</a>
             </div>
         </div>
     </div>
