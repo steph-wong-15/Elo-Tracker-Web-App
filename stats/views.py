@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
 from .models import Company, Game, Match, Player, Upcoming
 from users.models import User
 from django.views.generic.detail import DetailView
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
 
 def homeUpdate(request, gameType):
     # Games = Game.objects.filter(company=request.user.company.id) #will filter for games within the company
@@ -106,7 +108,6 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
     model = Match
     slug_url_kwarg = 'slug'
 
-
 @login_required
 def company(request):
     company = request.user.profile.company
@@ -151,3 +152,15 @@ class UpcomingList(ListView,LoginRequiredMixin):
 class UpcomingDetailView(DetailView,LoginRequiredMixin):
     model = Upcoming
     template_name = 'stats/upcoming.html'
+
+class UpcomingUpdateView(SuccessMessageMixin, UpdateView):
+    model = Upcoming
+    template_name = 'stats/updatematch.html'
+    form_class = AddUpcomingForm
+    success_message = 'Upcoming match successfully updated!'
+
+class UpcomingDeleteView(DeleteView):
+    model = Upcoming
+    template_name = 'stats/deletematch.html'
+    success_url = reverse_lazy('stats-schedule')
+    

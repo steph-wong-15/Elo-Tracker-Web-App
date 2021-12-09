@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import date
 from django.contrib.auth.models import User
+from django.urls import reverse
 from django.utils.text import slugify
 
 class Company(models.Model):
@@ -10,6 +11,7 @@ class Company(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
 class Player(models.Model):
     first_name = models.CharField(max_length=50)
     last_name =  models.CharField(max_length=50)
@@ -37,7 +39,6 @@ class Match(models.Model):
         self.slug = slugify(self.game, allow_unicode=True)
         return super(Match, self).save(*args, **kwargs)
 
-
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)
     score = models.BooleanField
@@ -54,14 +55,4 @@ class Upcoming(models.Model):
     def __str__(self):
         return self.title
     def get_absolute_url(self):
-        return reverse('stats-upcoming', kwargs={'pk': self.pk})
-
-    
-
-    
-
-
-
-
-
-
+        return reverse('stats-upcoming', kwargs={'pk': self.pk})  

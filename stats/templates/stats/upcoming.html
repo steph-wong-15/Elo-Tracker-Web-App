@@ -30,4 +30,9 @@
             </tr>
         </table>
     </div>
+    <div class="col text-left">
+        <a href="{% url 'stats-updatematch' object.id %}" class="btn btn-primary">Update Match</a>
+        <a href="{% url 'stats-deletematch' object.id %}" class="btn btn-outline-info" >Delete Match</a>
+    </div>
+</div>
 {% endblock content %}
