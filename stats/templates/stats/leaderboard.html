@@ -1,7 +1,16 @@
 {% extends "stats/base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
+
 
 {% block style %}
+<script type="text/javascript" src="{% static 'stats/jquery-3.3.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/d3.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/data.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/distribution.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/recentChange.js' %}"></script>
+
+
 <style>
     table{
         border-collapse: collapse;
@@ -29,6 +38,12 @@
 
 
 {% block content %}
+
+<div class="content-section">
+    <svg class="main-vis" id="visualization" height="200" width="100%"></svg>
+    <script>distributionGraph(ratingList, "#visualization")</script>
+</div>
+
 <div class="content-section">
     <table style="width: 100%">
         <thread>
