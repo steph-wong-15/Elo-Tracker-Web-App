@@ -1,0 +1,6 @@
+django
+django-cors-headers
+django-crispy-forms
+django-filter
+
+trueskill
