@@ -3,19 +3,52 @@ from django.contrib import messages
 from django.utils.timezone import get_default_timezone_name
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
 from .models import Company, Game, Match, Player, Upcoming, EloRating
-from users.models import User
+from users.models import User, Profile
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from datetime import date
 
 from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
-    Games = Game.objects.all()
-    context = {'Games': Games}
+    return redirect('stats-home-refresh', slug='default')
 
-    return render(request, 'stats/home.html',context)
+def homeRefresh(request, slug):
+    if (request.user.is_authenticated):
+        context = {}
+        user_profile = Profile.objects.filter(user = request.user).first()
+        Games = Game.objects.filter(company = user_profile.company)
+        if (not Games.exists()):
+            return render(request, 'stats/home.html')
+        context['Games'] = Games
+        Leaders = []
+        Recent_Matches = []
+        Upcoming_Matches = []
+        game = []
+        if (slug == 'default'):
+            game = Games.first()
+        else:
+            if (Games.filter(slug = slug).exists()):
+                game = Games.filter(company=user_profile.company, slug = slug).first()
+        if (isinstance(game,Game)):
+            top_ratings = list(EloRating.objects.filter(game = game.id).order_by('-mu')[:3].values_list('player', flat=True))
+            for player in top_ratings:
+                Leaders.append(User.objects.get(id=player))
+            Recent_Matches = Match.objects.filter(game = game.id, match_date__lt=date.today()).order_by('match_date')[:5]
+            Recent_Players = []
+            for match in Recent_Matches:
+                Recent_Players.append([match.player_A.username,match.player_B.username])
+            Upcoming_Matches = Match.objects.filter(game = game.id, match_date__gte=date.today()).order_by('match_date')[:5]
+            context['Leaders'] = Leaders
+            context['Histories'] = Recent_Matches
+            context['Upcomings'] = Upcoming_Matches
+            context['game_title'] = game.title
+        return render(request, 'stats/home.html', context)
+    else:
+        return render(request, 'stats/home.html')
+    
 
 def about(request):
     return render(request, 'stats/about.html')

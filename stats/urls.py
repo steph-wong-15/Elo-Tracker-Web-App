@@ -4,6 +4,7 @@ from stats.views import UpcomingList, UpcomingDetailView
 
 urlpatterns = [
     path('', views.home, name='stats-home'),
+    path('home/<slug:slug>', views.homeRefresh, name='stats-home-refresh'),
     path('about/', views.about, name='stats-about'),
     path('newgame/', views.newgame, name='stats-newgame'),
     path('game/<slug:slug>/', views.GameDetailView.as_view(), name='stats-game'),
