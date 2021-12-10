@@ -5,8 +5,8 @@ from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, companyInv
 from .models import Company, Game,Match
 from django.utils.timezone import get_default_timezone_name
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
-from .models import Company, Game, Match, Player, Upcoming, EloRating
-from users.models import User
+from .models import Company, Game, Match, Upcoming, EloRating
+from users.models import User, Profile
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,9 +16,11 @@ from django.utils.crypto import get_random_string
 from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
+    if( request.user.is_authenticated):
+        if(not request.user.profile.company):
+            return redirect('stats-company')
     Games = Game.objects.all()
     context = {'Games': Games}
-
     return render(request, 'stats/home.html',context)
 
 def about(request):
@@ -109,7 +111,7 @@ def company(request):
         return render(request, 'stats/company.html',{'form':form})
     else:
         company = request.user.profile.company
-        users = User.objects.all().filter(company = company)
+        users = Profile.objects.all().filter(company=company)
         form = companyInviteForm()
         return render(request, 'stats/company.html',{'company': company,'users':users,'form':form})
 
@@ -129,6 +131,9 @@ def createCompany(request):
     return render(request, 'stats/createCompany.html', {'form': form})
 
 def schedule(request):
+    if( request.user.is_authenticated):
+        if(not request.user.profile.company):
+            return redirect('stats-company')
     return render(request, 'stats/schedule.html')
 
 def newmatch(request):
