@@ -2,7 +2,7 @@ function distributionGraph(data=[], svgidentifier){
 
     svg = d3.select(svgidentifier)
 
-    divCount = 8
+    divCount = d3.min([8, data.length])
 
 
     min = d3.min(data)

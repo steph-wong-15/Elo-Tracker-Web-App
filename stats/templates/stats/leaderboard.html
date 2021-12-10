@@ -41,7 +41,7 @@
 
 <div class="content-section">
     <svg class="main-vis" id="visualization" height="200" width="100%"></svg>
-    <script>distributionGraph(ratingList, "#visualization")</script>
+    <script>distributionGraph({{ JSData }}, "#visualization")</script>
 </div>
 
 <div class="content-section">
@@ -56,12 +56,12 @@
             </tr>
         </thread>
 
-        {% if player_list %}
-            {% for player in player_list %}
+        {% if Ratings %}
+            {% for rating in Ratings %}
                 <tr>
-                    <th class="thName">{{player.first_name}} {{player.last_name}}</th>
-                    <th>{% if player.rating %} {{player.rating}} {% else %}1000{% endif %}</th>
-                    {% if player.recent_rating_change %}
+                    <th class="thName">{{rating.player.username}}</th>
+                    <th>{% if rating.mu %} {{ rating.mu|floatformat:0 }} {% else %}1000{% endif %}</th>
+                    {% if rating.recent_rating_change %}
                         {% if player.recent_rating_change > 0 %}
                             <th class="thPositive">{{ player.recent_rating_change}}</th>
                         {% elif player.recent_rating_change < 0 %}
@@ -78,7 +78,30 @@
 
                 </tr>
             {% endfor %}
+        {% else %}
+
         {% endif %}
+            
+
+        <!-- <tr>
+            <th class="thName">{{player.first_name}} {{player.last_name}}</th>
+            <th>{% if player.rating %} {{player.rating}} {% else %}1000{% endif %}</th>
+            {% if player.recent_rating_change %}
+                {% if player.recent_rating_change > 0 %}
+                    <th class="thPositive">{{ player.recent_rating_change}}</th>
+                {% elif player.recent_rating_change < 0 %}
+                    <th class="thNegative">{{ player.recent_rating_change}}</th>
+                {% else %}
+                    <th>{{ player.recent_rating_change }}</th>
+                {% endif %}
+            {% else %}
+                <th class="thPositive">+1000</th>
+            {% endif %}
+
+            <th>{% if player.wins %}{{player.wins}}{% else %}0{% endif %}</th>
+            <th>{% if player.losses %}{{player.losses}}{% else %}0{% endif %}</th>
+
+        </tr> -->
 
         <!-- <tr>
             <th class="thName">Player C</th>

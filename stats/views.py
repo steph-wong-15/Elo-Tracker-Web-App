@@ -149,19 +149,19 @@ def joinGame(request, **kwargs):
 
     return redirect('stats-home')
 
-class LeaderBoardList(ListView, LoginRequiredMixin):
+class LeaderBoardList(DetailView, LoginRequiredMixin):
 
-    model = Player
-    #context_object_name = 'player_list'
+    model = Game
+    context_object_name = 'player_list'
     template_name = 'stats/leaderboard.html'
     slug_url_kwarg = 'slug'
 
     def get_context_data(self, **kwargs):
-        context = {
-            'title': "Leaderboard",
-        }
-        kwargs.update(context)
-        return super().get_context_data(**kwargs)
+        context = super(LeaderBoardList, self).get_context_data(**kwargs)
+        context['Ratings'] = EloRating.objects.filter(game=self.get_object())
 
-    def get_queryset(self):
-        return Player.objects.order_by('last_name')
+        
+        context['JSData'] = list(map(lambda x: x.mu, context['Ratings']))
+        #matches = Match.objects.filter(game=self.get_object())
+
+        return context
