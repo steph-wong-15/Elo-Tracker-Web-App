@@ -131,3 +131,14 @@ LOGIN_REDIRECT_URL = 'stats-home'
 LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'elo.tracker.system@gmail.com'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'elo.tracker.system@gmail.com'
+EMAIL_HOST_PASSWORD = 'CMPT470project'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
