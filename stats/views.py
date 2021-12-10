@@ -1,5 +1,5 @@
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, companyInviteForm
 from .models import Company, Game,Match
@@ -8,11 +8,13 @@ from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomin
 from .models import Company, Game, Match, Upcoming, EloRating
 from users.models import User, Profile
 from django.views.generic.detail import DetailView
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.utils.crypto import get_random_string
+from django.urls import reverse_lazy
 
 from trueskill import Rating, rate_1vs1, expose, setup
 
@@ -125,7 +127,6 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
     model = Match
     slug_url_kwarg = 'slug'
 
-
 @login_required
 def company(request):
     if request.method == 'POST':
@@ -204,3 +205,14 @@ def joinGame(request, **kwargs):
         rating.save()
 
     return redirect('stats-home')
+class UpcomingUpdateView(SuccessMessageMixin, UpdateView):
+    model = Upcoming
+    template_name = 'stats/updatematch.html'
+    form_class = AddUpcomingForm
+    success_message = 'Upcoming match successfully updated!'
+
+class UpcomingDeleteView(DeleteView):
+    model = Upcoming
+    template_name = 'stats/deletematch.html'
+    success_url = reverse_lazy('stats-schedule')
+    
