@@ -10,7 +10,7 @@
         </div>
         <div class="row" display="flex">
         {% for game in Games %}
-        <a href="{% url 'stats-game' slug=game.slug %}">
+        <a href="{% url 'stats-home-refresh' slug=game.slug%}">
             <div class="col-12 col-lg-6" style="margin-bottom: 30px;">
                 <div class="card mx-auto" style="width: 300px;">
                     <img class="card-img-top" src="{{game.image.url}}" alt="Card image">
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-            </a>
+        </a>
         {% endfor %}
         </div>
     {% else %}
@@ -35,10 +35,10 @@
     <h3>Leaderboard</h3>
 {% if Leaders|length > 0 %}
 
-        <p class='text-muted'>Top 3 players for {{ GameType }}
+        <p class='text-muted'>Top 3 players for {{ game_title }}
             <ul class="list-group">
             {% for player in Leaders %}
-                <li class="list-group-item list-group-item-light">{{player.first_name}} {{player.last_name}}</li> 
+                <li class="list-group-item list-group-item-light">{{player.username}}</li> 
             {% endfor %}
             </ul>
         </p>
@@ -54,12 +54,12 @@
                 <h3>Company Recent Matches</h3>
                 {% if Histories|length > 0 %}
                     {% for match in Histories %}
-                            <p class='text-muted list-group-item'>{{ match.title }} {{ match.match_date}}
-                                <ul class="list-group">
-                                    {% for player in match.players %}
-                                        <li class="list-group-item-light">{{ player.first_name }} {{ player.last_name }}</li>
-                                    {% endfor %}
-                                </ul>
+                            <p class='text-muted list-group-item'>
+                                {{ match.match_date}}
+                                <br />
+                                {{ match.player_A }}
+                                <br />
+                                {{ match.player_B }}
                             </p>
                     {% endfor %}
                 {% else %}
@@ -70,13 +70,13 @@
                 <h3>Company Upcomings</h3>
                 {% if Upcomings|length > 0 %}
                     {% for match in Upcomings %}
-                            <p class='text-muted list-group-item'>{{ match.title }} {{ match.match_date}}
-                                <ul class="list-group">
-                                    {% for player in match.players %}
-                                        <li class="list-group-item-light">player.first_name player.last_name</li>
-                                    {% endfor %}
-                                </ul>
-                            </p>
+                        <p class='text-muted list-group-item'>
+                            {{ match.match_date}}
+                            <br />
+                            {{ match.player_A }}
+                            <br />
+                            {{ match.player_B }}
+                        </p>
                     {% endfor %}
                 {% else %}
                     <p class='text-muted'>No records found</p>

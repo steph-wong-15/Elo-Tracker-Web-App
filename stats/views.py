@@ -1,21 +1,59 @@
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, companyInviteForm
+from .models import Company, Game,Match
 from django.utils.timezone import get_default_timezone_name
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
-from .models import Company, Game, Match, Player, Upcoming, EloRating
-from users.models import User
+from .models import Company, Game, Match, Upcoming, EloRating
+from users.models import User, Profile
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from datetime import date
+from django.utils.crypto import get_random_string
 
 from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
-    Games = Game.objects.all()
-    context = {'Games': Games}
+    return redirect('stats-home-refresh', slug='default')
 
-    return render(request, 'stats/home.html',context)
+def homeRefresh(request, slug):
+    if (request.user.is_authenticated):
+        if(not request.user.profile.company):
+            return redirect('stats-company')
+        context = {}
+        user_profile = Profile.objects.filter(user = request.user).first()
+        Games = Game.objects.filter(company = user_profile.company)
+        if (not Games.exists()):
+            return render(request, 'stats/home.html')
+        context['Games'] = Games
+        Leaders = []
+        Recent_Matches = []
+        Upcoming_Matches = []
+        game = []
+        if (slug == 'default'):
+            game = Games.first()
+        else:
+            if (Games.filter(slug = slug).exists()):
+                game = Games.filter(company=user_profile.company, slug = slug).first()
+        if (isinstance(game,Game)):
+            top_ratings = list(EloRating.objects.filter(game = game.id).order_by('-mu')[:3].values_list('player', flat=True))
+            for player in top_ratings:
+                Leaders.append(User.objects.get(id=player))
+            Recent_Matches = Match.objects.filter(game = game.id, match_date__lt=date.today()).order_by('match_date')[:5]
+            Recent_Players = []
+            for match in Recent_Matches:
+                Recent_Players.append([match.player_A.username,match.player_B.username])
+            Upcoming_Matches = Match.objects.filter(game = game.id, match_date__gte=date.today()).order_by('match_date')[:5]
+            context['Leaders'] = Leaders
+            context['Histories'] = Recent_Matches
+            context['Upcomings'] = Upcoming_Matches
+            context['game_title'] = game.title
+        return render(request, 'stats/home.html', context)
+    else:
+        return render(request, 'stats/home.html')
 
 def about(request):
     return render(request, 'stats/about.html')
@@ -90,17 +128,32 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
 
 @login_required
 def company(request):
-    company = request.user.profile.company
-    users = User.objects.all().filter(company = company)
-    context = {'company': company,'users':users}
-
-    return render(request, 'stats/company.html',context)
+    if request.method == 'POST':
+        form = companyInviteForm(request.POST)
+        if form.is_valid():
+            inviteCode=form.cleaned_data.get('inviteCode')
+            companyQuery = Company.objects.filter(invite_code=inviteCode)
+            if companyQuery:
+                request.user.profile.company=companyQuery.get()
+                request.user.profile.save()
+                messages.info(request,f'Successully registered with company '+ companyQuery.get().name)
+                return HttpResponseRedirect(request.path_info)
+            else: 
+                messages.error(request,f'Invite code not valid')
+        return render(request, 'stats/company.html',{'form':form})
+    else:
+        company = request.user.profile.company
+        users = Profile.objects.all().filter(company=company)
+        form = companyInviteForm()
+        return render(request, 'stats/company.html',{'company': company,'users':users,'form':form})
 
 def createCompany(request):
     if request.method == 'POST':
         form = CreateCompanyForm(request.POST)
         if form.is_valid():
             company = form.save()
+            company.invite_code = get_random_string(length=32)
+            company.save()
             request.user.profile.company=company
             request.user.save()
             messages.success(request, f'Your company has been created!')
@@ -110,6 +163,9 @@ def createCompany(request):
     return render(request, 'stats/createCompany.html', {'form': form})
 
 def schedule(request):
+    if( request.user.is_authenticated):
+        if(not request.user.profile.company):
+            return redirect('stats-company')
     return render(request, 'stats/schedule.html')
 
 def newmatch(request):
