@@ -1,0 +1,15 @@
+<div class="row mb-3">
+    <div class="col text-center">
+        <h2>You are not registered with a company</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div style="padding: 16px;">
+            {{form}}
+            <button class="btn btn-outline-secondary" type="submit">Sign up</a>
+        </div>
+    </form> 
+        <div style="padding: 16px;">
+            <a href="{% url 'stats-createCompany' %}" class="btn btn-primary">Create New Company</a>
+        </div>
+    </div>
+</div>
