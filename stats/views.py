@@ -1,26 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-<<<<<<< HEAD
-from .forms import GameRegisterForm
-from .models import Game, Player
-from .forms import AddResultsForm
-from .models import Match
-=======
 from django.utils.timezone import get_default_timezone_name
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
 from .models import Company, Game, Match, Player, Upcoming, EloRating
 from users.models import User
->>>>>>> master
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-<<<<<<< HEAD
-from django.views.generic.list import ListView
-=======
 from django.contrib.auth.decorators import login_required
 
 from trueskill import Rating, rate_1vs1, expose, setup
->>>>>>> master
 
 def home(request):
     Games = Game.objects.all()
