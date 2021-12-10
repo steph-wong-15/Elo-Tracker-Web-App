@@ -8,14 +8,10 @@ from django.utils.text import slugify
 class Company(models.Model):
     name = models.CharField(max_length=100)
     admins = models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
-
+    invite_code = models.CharField(max_length=32,default='defaultInviteCode')
     def __str__(self):
         return f'{self.name}'
 
-class Player(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name =  models.CharField(max_length=50)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
 class Game(models.Model):
     title = models.CharField(max_length=100)
@@ -32,12 +28,19 @@ class Match(models.Model):
     player_B = models.ForeignKey(User, on_delete=models.CASCADE, related_name='participant_B', null = True)
     score_A = models.IntegerField(null = True)
     score_B = models.IntegerField(null = True)
-    elo_change = models.IntegerField(null = True)
+    elo_A = models.IntegerField(null = True)
+    elo_B = models.IntegerField(null = True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
     match_date = models.DateField(default = date.today)
     def save(self, *args, **kwargs):
         self.slug = slugify(self.game, allow_unicode=True)
         return super(Match, self).save(*args, **kwargs)
+
+class EloRating(models.Model):
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null = True)
+    mu = models.FloatField(null = True)
+    sigma = models.FloatField(null = True)
 
 class Results(models.Model):
     date_posted = models.DateTimeField(default=timezone.now)

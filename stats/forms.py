@@ -16,7 +16,7 @@ class GameRegisterForm(forms.ModelForm):
 class AddResultsForm(forms.ModelForm):
     class Meta:
         model = Match
-        fields = ['game','match_date','player_A','score_A', 'player_B', 'score_B']
+        fields = ['match_date','player_A','score_A', 'player_B', 'score_B']
         widgets = {
             'match_date': DateInput(),
         }
@@ -25,6 +25,9 @@ class CreateCompanyForm(forms.ModelForm):
     class Meta:
         model = Company
         fields = ['name','admins',]
+
+class companyInviteForm(forms.Form):
+    inviteCode = forms.CharField(label="Invite Code",max_length=32,required=True)
 
 class AddUpcomingForm(forms.ModelForm):
     class Meta:
