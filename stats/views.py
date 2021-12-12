@@ -151,6 +151,21 @@ def joinGame(request, **kwargs):
 
     return redirect('stats-home')
 
+#Takes the current rating and a sorted list of matches
+#returns a list of previous ratings
+def previousRatings(currentRating, player, matchList):
+    ratings = []
+    ratings.append(round(currentRating))
+
+    for match in matchList:
+        if match.player_A == player:
+            ratings.append(round(match.elo_A))
+        elif match.player_B == player:
+            ratings.append(round(match.elo_B))
+
+    return ratings
+
+
 class LeaderBoardList(DetailView, LoginRequiredMixin):
 
     model = Game
@@ -183,7 +198,7 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
 
         return context
 
-#def LeaderBoardRating(request, **kwargs):
+
 
 class LeaderBoardRating(DetailView, LoginRequiredMixin):
 
@@ -213,14 +228,18 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         matches = Match.objects.filter(Q(player_B = user.id) | Q(player_A = user.id)).order_by('-match_date')
 
         
-
-        recentsize = 20
-        recentmatches = islice(list(matches), 0, recentsize)
-        
-        context['matches'] = recentmatches
         context['position'] = position
-        context['rating']  = expose(Rating(mu=user.mu, sigma=user.sigma))
+        context['rating']  = round(expose(Rating(mu=user.mu, sigma=user.sigma)))
         context['username'] = user.player.username
+
+        recentsize = 1
+        recentmatches = islice(list(matches), 0, recentsize)
+        context['matches'] = recentmatches
+
+        prev = previousRatings(context['rating'], user.player, matches)
+        recentchange = context['rating'] - prev[min(len(prev)-1, recentsize)]
+        context['recent'] = recentchange
+
         return context
 
 
