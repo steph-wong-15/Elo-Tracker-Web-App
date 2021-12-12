@@ -48,7 +48,8 @@
     <table style="width: 100%">
         <thread>
             <tr>
-                <th title="Player name"style="text-align: initial; width: 30%;"><span style="font-weight: bold">Player</span></th>
+                <th title="Player position" style="text-align: initial;"><span style="font-weight: bold"></span></th>
+                <th title="Player name" style="text-align: initial; width: 30%;"><span style="font-weight: bold">Player</span></th>
                 <th title="Player's current rating"><span style="font-weight: bold">Rating</span></th>
                 <th title="Rating change over the last 20 games"><span style="font-weight: bold">Recent</span></th>
                 <th title="Player's total wins"><span style="font-weight: bold">Wins</span></th>
@@ -59,8 +60,9 @@
         {% if Ratings %}
             {% for rating in Ratings %}
                 <tr>
-                    <th class="thName">{{rating.player.username}}</th>
-                    <th>{% if rating.mu %} {{ rating.mu|floatformat:0 }} {% else %}1000{% endif %}</th>
+                    <th>{{rating.position}}</th>
+                    <th class="thName"><a href="{% url 'stats-leaderboard-rating' object.slug rating.url %}">{{rating.player.username}}</a></th>
+                    <th>{% if rating.expose %} {{ rating.expose|floatformat:0 }} {% else %}1000{% endif %}</th>
                     {% if rating.recent_rating_change %}
                         {% if player.recent_rating_change > 0 %}
                             <th class="thPositive">{{ player.recent_rating_change}}</th>
@@ -82,50 +84,6 @@
 
         {% endif %}
             
-
-        <!-- <tr>
-            <th class="thName">{{player.first_name}} {{player.last_name}}</th>
-            <th>{% if player.rating %} {{player.rating}} {% else %}1000{% endif %}</th>
-            {% if player.recent_rating_change %}
-                {% if player.recent_rating_change > 0 %}
-                    <th class="thPositive">{{ player.recent_rating_change}}</th>
-                {% elif player.recent_rating_change < 0 %}
-                    <th class="thNegative">{{ player.recent_rating_change}}</th>
-                {% else %}
-                    <th>{{ player.recent_rating_change }}</th>
-                {% endif %}
-            {% else %}
-                <th class="thPositive">+1000</th>
-            {% endif %}
-
-            <th>{% if player.wins %}{{player.wins}}{% else %}0{% endif %}</th>
-            <th>{% if player.losses %}{{player.losses}}{% else %}0{% endif %}</th>
-
-        </tr> -->
-
-        <!-- <tr>
-            <th class="thName">Player C</th>
-            <th>1500</th>
-            <th>+0</th>
-            <th>80</th>
-            <th>20</th>
-        </tr>
-
-        <tr>
-            <th class="thName">Player A</th>
-            <th>1000</th>
-            <th class="thPositive">+10</th>
-            <th>50</th>
-            <th>50</th>
-        </tr>
-
-        <tr>
-            <th class="thName">Player B</th>
-            <th>500</th>
-            <th class="thNegative">-10</th>
-            <th>20</th>
-            <th>80</th>
-        </tr> -->
     </table>
 </div>
 

@@ -160,11 +160,26 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
 
     def get_context_data(self, **kwargs):
         context = super(LeaderBoardList, self).get_context_data(**kwargs)
-        context['Ratings'] = EloRating.objects.filter(game=self.get_object())
+        ratings = EloRating.objects.filter(game=self.get_object())
 
+        #context['Ratings'] = ratings
+
+        #context['exposures'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
         
-        context['JSData'] = list(map(lambda x: x.mu, context['Ratings']))
+        i = 1
+        for rating in ratings:
+            rating.expose = expose(Rating(mu=rating.mu, sigma=rating.sigma))
+            rating.position = i
+            rating.url = str(rating.player_id)
+            i += 1
+
+        context['Ratings'] = sorted(list(ratings), key=lambda x: x.expose, reverse=True)
+
+        context['JSData'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
+        #context['JSData'] = list(map(lambda x: x.mu, ratings))
         #matches = Match.objects.filter(game=self.get_object())
+
+        #Ratings = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(context['Ratings'])))
 
         return context
 
@@ -197,12 +212,14 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         #Find all matches in which user was a player
         matches = Match.objects.filter(Q(player_B = user.id) | Q(player_A = user.id)).order_by('-match_date')
 
-        recentsize = 5
+        
+
+        recentsize = 20
         recentmatches = islice(list(matches), 0, recentsize)
         
         context['matches'] = recentmatches
         context['position'] = position
-        context['rating']  = user.mu
+        context['rating']  = expose(Rating(mu=user.mu, sigma=user.sigma))
         context['username'] = user.player.username
         return context
 
