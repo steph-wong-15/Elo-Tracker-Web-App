@@ -18,6 +18,9 @@ class Game(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     slug = models.SlugField(max_length=50, null=True)
     image = models.ImageField(default='game_default.png', upload_to='game_pics')
+    
+    def __str__(self):
+        return self.title
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title, allow_unicode=True)

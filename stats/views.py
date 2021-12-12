@@ -15,7 +15,9 @@ from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
-
+from django.core.mail import send_mail
+from django.conf import settings
+from stats.filters import UpcomingFilter
 from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
@@ -172,9 +174,15 @@ def schedule(request):
 def newmatch(request):
     if request.method == 'POST':
         form = AddUpcomingForm(request.POST)
+
         if form.is_valid():
+            upcoming = form.cleaned_data
+            subject = "Upcoming Match"
+            message = "Hello, here is a friendly reminder you have an upcoming match scheduled!"
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [upcoming['player_1'].email, upcoming['player_2'].email])
             form.save()
-            messages.success(request, f'Your match has been scheduled!')
+            messages.success(request, f'A match has been scheduled & participants will be notified through email!')
+
             return redirect('stats-schedule')
     else:
         form = AddUpcomingForm()
@@ -215,4 +223,9 @@ class UpcomingDeleteView(DeleteView):
     model = Upcoming
     template_name = 'stats/deletematch.html'
     success_url = reverse_lazy('stats-schedule')
+
+def search(request):
+    upcoming_list = Upcoming.objects.all()
+    upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
+    return render(request, 'stats/schedule.html', {'filter': upcoming_filter})
     

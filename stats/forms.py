@@ -36,5 +36,5 @@ class AddUpcomingForm(forms.ModelForm):
         widgets = {
             'date': DateInput(),
             'start_time': TimeInput(),
-            'end_time': TimeInput()
+            'end_time': TimeInput(),
         }
