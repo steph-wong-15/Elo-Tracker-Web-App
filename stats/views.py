@@ -17,7 +17,7 @@ from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.conf import settings
-
+from stats.filters import UpcomingFilter
 from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
@@ -223,4 +223,9 @@ class UpcomingDeleteView(DeleteView):
     model = Upcoming
     template_name = 'stats/deletematch.html'
     success_url = reverse_lazy('stats-schedule')
+
+def search(request):
+    upcoming_list = Upcoming.objects.all()
+    upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
+    return render(request, 'stats/schedule.html', {'filter': upcoming_filter})
     
