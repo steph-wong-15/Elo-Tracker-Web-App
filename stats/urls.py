@@ -14,5 +14,6 @@ urlpatterns = [
     path('schedule/new/', views.newmatch, name='stats-newmatch'),
     path('schedule/<pk>/', views.UpcomingDetailView.as_view(), name='stats-upcoming'),
     path('joingame/<slug:slug>/', views.joinGame, name='stats-joingame'),
-    path('game/<slug:slug>/leaderboard/', views.LeaderBoardList.as_view(), name='test'),
+    path('game/<slug:slug>/leaderboard/', views.LeaderBoardList.as_view(), name='stats-leaderboard'),
+    path('game/<slug:game>/leaderboard/<int:rating_id>', views.LeaderBoardRating.as_view(), name='stats-leaderboard-rating'),
 ]

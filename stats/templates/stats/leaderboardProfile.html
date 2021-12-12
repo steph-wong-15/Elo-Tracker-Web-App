@@ -1,0 +1,24 @@
+{% extends "stats/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+{% if rating %}
+    <h1>{{game.title}} Leaderboard</h1>
+{% endif %}
+
+<div class="content-section">
+    <h1>{{username}} {{rating|floatformat:0}} #{{position}}</h1>
+</div>
+
+{% if matches %}
+<h3>Recent Matches</h3>
+<div class="content-section">
+    
+    {% for match in matches %}
+        <p>{{match.id}} {{match.player_A.username}} - ({{match.score_A}}) | {{match.player_B.username}} ({{match.score_B}}) | {{ match.match_date }} </p>
+    {% endfor %}
+{% endif %}
+</div>
+{% endblock content %}

@@ -8,7 +8,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
+from itertools import islice
 from trueskill import Rating, rate_1vs1, expose, setup
 
 def home(request):
@@ -165,3 +167,44 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
         #matches = Match.objects.filter(game=self.get_object())
 
         return context
+
+#def LeaderBoardRating(request, **kwargs):
+
+class LeaderBoardRating(DetailView, LoginRequiredMixin):
+
+    model = Game
+    context_object_name = 'game'
+    template_name = 'stats/leaderboardProfile.html'
+    slug_url_kwarg = 'game'
+    
+    
+    
+    def get_context_data(self, **kwargs):
+
+        context = super(LeaderBoardRating, self).get_context_data(**kwargs)
+        
+        #print("ID: ", kwargs.get('rating_id'))
+
+        try:
+            user = EloRating.objects.filter(game = self.get_object(), player = self.kwargs['rating_id'])[0]
+        except IndexError:
+            #404, user has no rating for this game or does not exist
+            return()
+
+        #find the users position on the ladder
+        position = list(EloRating.objects.filter(game = self.get_object())).index(user) + 1
+
+        #Find all matches in which user was a player
+        matches = Match.objects.filter(Q(player_B = user.id) | Q(player_A = user.id)).order_by('-match_date')
+
+        recentsize = 5
+        recentmatches = islice(list(matches), 0, recentsize)
+        
+        context['matches'] = recentmatches
+        context['position'] = position
+        context['rating']  = user.mu
+        context['username'] = user.player.username
+        return context
+
+
+    
