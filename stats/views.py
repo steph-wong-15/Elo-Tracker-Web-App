@@ -12,6 +12,9 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.http import Http404
+from itertools import islice
 from datetime import date
 from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
@@ -213,6 +216,147 @@ def joinGame(request, **kwargs):
         rating.save()
 
     return redirect('stats-home')
+
+#Takes the current rating and a sorted list of matches
+#returns a list of previous ratings
+def previousRatings(currentRating, player, matchList):
+    ratings = []
+    
+
+    wins = 0
+    losses = 0
+    draws = 0
+
+    for match in matchList:
+        if match.player_A == player:
+            ratings.append(round(match.elo_A))
+            if(match.score_A > match.score_B):
+                wins += 1
+                match.result = 'W'
+            elif(match.score_B > match.score_A):
+                losses += 1
+                match.result = 'L'
+            else:
+                draws += 1
+                match.result = 'D'
+        elif match.player_B == player:
+            ratings.append(round(match.elo_B))
+            if(match.score_B > match.score_A):
+                wins += 1
+                match.result = 'W'
+            elif(match.score_A > match.score_B):
+                losses += 1
+                match.result = 'L'
+            else:
+                draws += 1
+                match.result = 'D'
+                
+    ratings.append(round(currentRating))
+
+    ratings = list(reversed(ratings))
+
+    return ratings, [wins, losses, draws]
+
+
+class LeaderBoardList(DetailView, LoginRequiredMixin):
+
+    model = Game
+    context_object_name = 'player_list'
+    template_name = 'stats/leaderboard.html'
+    slug_url_kwarg = 'slug'
+
+    def get_context_data(self, **kwargs):
+        context = super(LeaderBoardList, self).get_context_data(**kwargs)
+        ratings = EloRating.objects.filter(game=self.get_object())
+        
+        matches = Match.objects.filter(game=self.get_object())
+        recentsize = 3
+
+        for rating in ratings:
+            rating.expose = round(expose(Rating(mu=rating.mu, sigma=rating.sigma)))
+            rating.url = str(rating.player_id)
+
+            prev, wins = previousRatings(rating.expose, rating.player, matches)
+            recentchange = round(rating.expose - prev[min(len(prev)-1, recentsize)])
+            rating.recent = recentchange
+            rating.wins = wins[0]
+            rating.losses = wins[1]
+            rating.draws = wins[2]
+
+        ratings = sorted(list(ratings), key=lambda x: x.expose, reverse=True)
+        
+        for rating in ratings:
+            rating.position = ratings.index(rating)+1
+        context['Ratings'] = ratings
+
+        context['JSData'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
+
+        return context
+
+
+
+class LeaderBoardRating(DetailView, LoginRequiredMixin):
+
+    model = Game
+    context_object_name = 'game'
+    template_name = 'stats/leaderboardProfile.html'
+    slug_url_kwarg = 'game'
+    
+    
+    
+    def get_context_data(self, **kwargs):
+
+        context = super(LeaderBoardRating, self).get_context_data(**kwargs)
+
+        try:
+            user = EloRating.objects.filter(game = self.get_object(), player = self.kwargs['rating_id'])[0]
+        except IndexError:
+            #404, user has no rating for this game or does not exist
+            raise Http404("Rating does not exist")
+            return {}
+        #find the users position on the ladder
+        position = list(EloRating.objects.filter(game = self.get_object())).index(user) + 1
+
+        #Find all matches in which user was a player
+        matches = Match.objects.filter(Q(player_B = user.player) | Q(player_A = user.player)).order_by('match_date', 'id')
+
+        
+        context['position'] = position
+        context['rating']  = round(expose(Rating(mu=user.mu, sigma=user.sigma)))
+        context['username'] = user.player.username
+
+        recentsize = 20
+        recentmatches = islice(list(matches), 0, recentsize)
+        context['matches'] = recentmatches
+
+        change = []
+
+        prev, wins = previousRatings(context['rating'], user.player, list(matches))
+        
+        prev = list(reversed(prev))
+
+        if len(matches) > 1:
+            for match in matches:
+                match.change = prev[list(matches).index(match)+1] - prev[list(matches).index(match)]
+                change.append(match.change)
+
+        elif len(matches) == 1:
+            change = [context['rating']] 
+            #prev = [context['rating']]     
+            matches[0].change = context['rating']           
+            
+        else:
+            #prev = [0]
+            change = [0]
+
+        context['wins'] = wins[0]
+        context['losses'] = wins[1]
+        context['draws'] = wins[2]
+        context['JSData'] = change
+
+        return context
+
+
 class UpcomingUpdateView(SuccessMessageMixin, UpdateView):
     model = Upcoming
     template_name = 'stats/updatematch.html'
@@ -228,4 +372,3 @@ def search(request):
     upcoming_list = Upcoming.objects.all()
     upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
     return render(request, 'stats/schedule.html', {'filter': upcoming_filter})
-    

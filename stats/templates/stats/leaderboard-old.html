@@ -1,0 +1,16 @@
+{% extends "stats/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+    {% if player_list %}
+        <ol>
+            {% for player in player_list %}
+            <!-- <a href=" url 'stats: "></a> -->
+                <li> {{player.first_name}} {{player.last_name}}</li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p>test failure</p>
+    </div>
+    {% endif %}
+{% endblock content %}
