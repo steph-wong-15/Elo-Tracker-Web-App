@@ -70,6 +70,9 @@ def newgame(request):
             messages.success(request, f'Your game has been created!')
             return redirect('stats-home')
     else:
+        if( request.user.is_authenticated):
+            if(not request.user.profile.company):
+                return redirect('stats-company')
         form = GameRegisterForm()
     return render(request, 'stats/newgame.html', {'form': form})
 
@@ -146,9 +149,11 @@ def company(request):
         return render(request, 'stats/company.html',{'form':form})
     else:
         company = request.user.profile.company
+        admins=company.admins.all()
+        print(request.user)
         users = Profile.objects.all().filter(company=company)
         form = companyInviteForm()
-        return render(request, 'stats/company.html',{'company': company,'users':users,'form':form})
+        return render(request, 'stats/company.html',{'company': company,'admins':admins,'users':users,'form':form})
 
 def createCompany(request):
     if request.method == 'POST':
@@ -157,6 +162,7 @@ def createCompany(request):
             company = form.save()
             company.invite_code = get_random_string(length=32)
             company.save()
+            
             request.user.profile.company=company
             request.user.save()
             messages.success(request, f'Your company has been created!')
@@ -174,7 +180,6 @@ def schedule(request):
 def newmatch(request):
     if request.method == 'POST':
         form = AddUpcomingForm(request.POST)
-
         if form.is_valid():
             upcoming = form.cleaned_data
             subject = "Upcoming Match"
@@ -225,6 +230,11 @@ class UpcomingDeleteView(DeleteView):
     success_url = reverse_lazy('stats-schedule')
 
 def search(request):
+    if( request.user.is_authenticated):
+        print( request.user.profile.company)
+        if(not request.user.profile.company):
+            return redirect('stats-company')
+
     upcoming_list = Upcoming.objects.all()
     upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
     return render(request, 'stats/schedule.html', {'filter': upcoming_filter})

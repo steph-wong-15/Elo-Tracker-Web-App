@@ -7,7 +7,7 @@ from django.utils.text import slugify
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
-    admins = models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+    admins = models.ManyToManyField(User,symmetrical=False)
     invite_code = models.CharField(max_length=32,default='defaultInviteCode')
     def __str__(self):
         return f'{self.name}'

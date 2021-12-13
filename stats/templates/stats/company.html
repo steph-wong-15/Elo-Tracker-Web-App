@@ -7,7 +7,12 @@
                 <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
                 <div class="media-body">
                     <h2 class="account-heading">{{ company.name }}</h2>
-                    <p class="text-secondary">admin: {{ company.admins.username }}</p>
+                    <p class="text-secondary">admins:                     
+                        {% for admin in admins %}
+                            {{admin}}
+                        {% endfor %}
+                    </p>
+
                     <h7>invite code:  {{ company.invite_code}}</h7>
                     <h6>users registered: {{users|length}} </h6>
                     <ul>
@@ -23,7 +28,7 @@
         <div class="col text-center">
             <h2>You are not registered with a company</h2>
         <form method="POST">
-            {% csrf_token %}
+        {% csrf_token %}
             <div style="padding: 16px;">
                 {{form}}
                 <button class="btn btn-outline-secondary" type="submit">Sign up</a>

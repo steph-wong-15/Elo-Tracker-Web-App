@@ -24,7 +24,7 @@ class AddResultsForm(forms.ModelForm):
 class CreateCompanyForm(forms.ModelForm):
     class Meta:
         model = Company
-        fields = ['name','admins',]
+        fields = ['name']
 
 class companyInviteForm(forms.Form):
     inviteCode = forms.CharField(label="Invite Code",max_length=32,required=True)
