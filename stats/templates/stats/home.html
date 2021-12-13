@@ -71,11 +71,11 @@
                 {% if Upcomings|length > 0 %}
                     {% for match in Upcomings %}
                         <p class='text-muted list-group-item'>
-                            {{ match.match_date}}
+                            {{ match.date}}
                             <br />
-                            {{ match.player_A }}
+                            {{ match.player_1 }}
                             <br />
-                            {{ match.player_B }}
+                            {{ match.player_2 }}
                         </p>
                     {% endfor %}
                 {% else %}
