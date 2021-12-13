@@ -1,0 +1,88 @@
+{% extends "stats/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block style %}
+<script type="text/javascript" src="{% static 'stats/jquery-3.3.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/d3.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/data.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/distribution.js' %}"></script>
+<script type="text/javascript" src="{% static 'stats/recentChange.js' %}"></script>
+
+
+<style>
+    table{
+        border-collapse: collapse;
+        font-family: Arial;
+    }
+
+    th {
+        padding-right: 8px;
+        padding-left: 8px;
+        font-weight: normal;
+    }
+    .thName{
+        text-align: initial;
+    }
+    .thPositive{
+        color: green;
+    }
+    .thNegative{
+        color: red;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if rating %}
+    <h1>{{game.title}} Leaderboard</h1>
+{% endif %}
+
+<div class="content-section">
+    <h1>{{username}} | Rating: {{rating|floatformat:0}} | Position: #{{position}}</h1>
+    <h3 title="Wins/Losses/Draws">{{wins}}/{{losses}}/{{draws}}</h3>
+    <svg class="main-vis" id="visualization" height="200" width="100%"></svg>
+    <script>recentChangeGraph({{ JSData }}, {{rating}},"#visualization")</script>
+</div>
+
+<h3>Recent Matches</h3>
+<div class="content-section">
+    <table style="width: 100%">
+        <thread>
+            <tr>
+                <th title="Match ID" style="text-align: initial;"><span style="font-weight: bold">Match ID</span></th>
+                <th title="Match result for {{username}}" style="text-align: initial;"><span style="font-weight: bold">Result</span></th>
+                <th title="First player username"><span style="font-weight: bold">Player 1 - (score)</span></th>
+                <th title="Second player username"><span style="font-weight: bold">Player 2 - (score)</span></th>
+                <th title="Rating change for {{username}} as a result of this match"><span style="font-weight: bold">Rating Change</span></th>
+            </tr>
+        </thread>
+        {% if matches %}
+            {% for match in matches %}
+                <tr>
+                    <th title="{{match.match_date}}">{{ match.id }}</th>
+                    {% if match.result %}
+                        {% if match.result == 'W' %}
+                            <th class="thPositive">Win</th>
+                        {% elif match.result == 'L' %}
+                            <th class="thNegative">Loss</th>
+                        {% else %}
+                            <th>Draw</th>
+                        {% endif %}
+                    {% else %}
+                        <th>Draw</th>
+                    {% endif %}
+
+                    <th>{{match.player_A}} - ({{match.score_A}})</th>
+                    <th>{{match.player_B}} - ({{match.score_B}})</th>
+                    {% if match.change > 0 %} <th class="thPositive">+{{match.change}}</th> {% elif match.change < 0 %}<th class=thNegative>{{match.change}}</th> {% else %}<th>0</th>{% endif %}
+
+                </tr>
+
+            {% endfor %}
+        {% endif %}
+
+</div>
+{% endblock content %}

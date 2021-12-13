@@ -17,6 +17,7 @@
                     <div class="card-body">
                         <h4 class="card-title">{{game.title}}</h4>
                         <a href="{% url 'stats-game' slug=game.slug %}" class="btn btn-primary">See Results</a>
+                        <a href="{% url 'stats-leaderboard' game.slug %}" class="btn btn-primary">See Leaderboards</a>
                     </div>
                 </div>
             </div>
@@ -71,11 +72,11 @@
                 {% if Upcomings|length > 0 %}
                     {% for match in Upcomings %}
                         <p class='text-muted list-group-item'>
-                            {{ match.match_date}}
+                            {{ match.date}}
                             <br />
-                            {{ match.player_A }}
+                            {{ match.player_1 }}
                             <br />
-                            {{ match.player_B }}
+                            {{ match.player_2 }}
                         </p>
                     {% endfor %}
                 {% else %}
