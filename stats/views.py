@@ -94,9 +94,10 @@ class GameDetailView(DetailView,LoginRequiredMixin):
 def results(request, **kwargs):
     slug = kwargs['slug']
     game = Game.objects.get(slug=slug)
+    company = game.company
 
     if request.method == 'POST':
-        form = AddResultsForm(request.POST)
+        form = AddResultsForm(request.POST, game=game)
 
         if form.is_valid():
             player_A = EloRating.objects.get(player = form.cleaned_data['player_A'], game = game)
@@ -123,7 +124,7 @@ def results(request, **kwargs):
             messages.success(request, f'Your match results were added!')
             return redirect('stats-home')
     else:
-        form = AddResultsForm()
+        form = AddResultsForm(game=game)
     return render(request, 'stats/results.html',{'form': form})
 
 class ResultsDetailView(DetailView, LoginRequiredMixin):

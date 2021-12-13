@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import fields
-from .models import Company, Game, Match, Upcoming
+from .models import Company, Game, Match, Upcoming, EloRating
 from django.forms import ModelForm
 
 class DateInput(forms.DateInput):
@@ -20,6 +20,12 @@ class AddResultsForm(forms.ModelForm):
         widgets = {
             'match_date': DateInput(),
         }
+    def __init__(self, **kwargs):
+        game = kwargs.pop('game', None)
+        super().__init__(**kwargs)
+        
+        self.fields['player_A'].queryset = EloRating.objects.filter(game = game)
+        self.fields['player_B'].queryset = EloRating.objects.filter(game = game)
 
 class CreateCompanyForm(forms.ModelForm):
     class Meta:
