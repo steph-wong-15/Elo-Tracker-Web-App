@@ -4,7 +4,7 @@ from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, companyInviteForm
 from .models import Company, Game,Match
 from django.utils.timezone import get_default_timezone_name
-from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
+from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm,PromoteAdminForm
 from .models import Company, Game, Match, Upcoming, EloRating
 from users.models import User, Profile
 from django.views.generic.detail import DetailView
@@ -135,25 +135,39 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
 @login_required
 def company(request):
     if request.method == 'POST':
-        form = companyInviteForm(request.POST)
-        if form.is_valid():
-            inviteCode=form.cleaned_data.get('inviteCode')
-            companyQuery = Company.objects.filter(invite_code=inviteCode)
-            if companyQuery:
-                request.user.profile.company=companyQuery.get()
-                request.user.profile.save()
-                messages.info(request,f'Successully registered with company '+ companyQuery.get().name)
-                return HttpResponseRedirect(request.path_info)
-            else: 
-                messages.error(request,f'Invite code not valid')
-        return render(request, 'stats/company.html',{'form':form})
+        if 'promoteUser' in request.POST:
+            print(request.POST)
+            form = PromoteAdminForm(request.user.profile.company,request.POST)
+            if form.is_valid():
+                user=form.cleaned_data.get('chosenUser')
+                request.user.profile.company.admins.add(user.user)
+            return HttpResponseRedirect(request.path_info)
+        else:
+            print(request.POST)
+            form = companyInviteForm(request.POST)
+            if form.is_valid():
+                inviteCode=form.cleaned_data.get('inviteCode')
+                companyQuery = Company.objects.filter(invite_code=inviteCode)
+                if companyQuery:
+                    request.user.profile.company=companyQuery.get()
+                    request.user.profile.save()
+                    messages.info(request,f'Successully registered with company '+ companyQuery.get().name)
+                    return HttpResponseRedirect(request.path_info)
+                else: 
+                    messages.error(request,f'Invite code not valid')
+            return render(request, 'stats/company.html',{'form':form})
     else:
         company = request.user.profile.company
-        admins=company.admins.all()
-        print(request.user)
+        admins=[]
+        if company:
+            admins=company.admins.all()
+        isAdmin = request.user in admins
         users = Profile.objects.all().filter(company=company)
         form = companyInviteForm()
-        return render(request, 'stats/company.html',{'company': company,'admins':admins,'users':users,'form':form})
+        adminForm=None
+        if(isAdmin):
+            adminForm = PromoteAdminForm(company=company)
+        return render(request, 'stats/company.html',{'company': company,'admins':admins,'users':users,'form':form,'adminForm':adminForm,'isAdmin':isAdmin})
 
 def createCompany(request):
     if request.method == 'POST':
@@ -162,7 +176,7 @@ def createCompany(request):
             company = form.save()
             company.invite_code = get_random_string(length=32)
             company.save()
-            
+            company.admins.add(request.user)
             request.user.profile.company=company
             request.user.save()
             messages.success(request, f'Your company has been created!')

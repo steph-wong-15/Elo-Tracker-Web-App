@@ -17,11 +17,21 @@
                     <h6>users registered: {{users|length}} </h6>
                     <ul>
                     {% for user in users %} 
-                    <li>{{user}}</li>
+                    <li>{{user.user.username}}</li>
                     {% endfor %}
                     </ul>
                 </div>
             </div>
+            {% if isAdmin %}
+            <form method="POST">
+                    {% csrf_token %}
+                <div style="padding: 16px;" class="media-body">
+                    <h6>Promote user to admin</h6>
+                    {{adminForm}}
+                    <input class="btn btn-outline-secondary" name="promoteUser" type="submit"></input>
+                </div>
+            </form>
+            {% endif %}
 
     {% else %}
     <div class="row mb-3">
