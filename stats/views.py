@@ -157,13 +157,36 @@ def previousRatings(currentRating, player, matchList):
     ratings = []
     ratings.append(round(currentRating))
 
+    wins = 0
+    losses = 0
+    draws = 0
+
     for match in matchList:
         if match.player_A == player:
             ratings.append(round(match.elo_A))
+            if(match.score_A > match.score_B):
+                wins += 1
+                match.result = 'W'
+            elif(match.score_B > match.score_A):
+                losses += 1
+                match.result = 'L'
+            else:
+                draws += 1
+                match.result = 'D'
         elif match.player_B == player:
             ratings.append(round(match.elo_B))
+            if(match.score_B > match.score_A):
+                wins += 1
+                match.result = 'W'
+            elif(match.score_A > match.score_B):
+                losses += 1
+                match.result = 'L'
+            else:
+                draws += 1
+                match.result = 'D'
+                
 
-    return ratings
+    return ratings, [wins, losses, draws]
 
 
 class LeaderBoardList(DetailView, LoginRequiredMixin):
@@ -176,25 +199,28 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super(LeaderBoardList, self).get_context_data(**kwargs)
         ratings = EloRating.objects.filter(game=self.get_object())
-
-        #context['Ratings'] = ratings
-
-        #context['exposures'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
         
-        i = 1
+        matches = Match.objects.filter(game=self.get_object())
+        recentsize = 1
+
         for rating in ratings:
             rating.expose = expose(Rating(mu=rating.mu, sigma=rating.sigma))
-            rating.position = i
             rating.url = str(rating.player_id)
-            i += 1
 
-        context['Ratings'] = sorted(list(ratings), key=lambda x: x.expose, reverse=True)
+            prev, wins = previousRatings(rating.expose, rating.player, matches)
+            recentchange = rating.expose - prev[min(len(prev)-1, recentsize)]
+            rating.recent = recentchange
+            rating.wins = wins[0]
+            rating.losses = wins[1]
+            rating.draws = wins[2]
+
+        ratings = sorted(list(ratings), key=lambda x: x.expose, reverse=True)
+        
+        for rating in ratings:
+            rating.position = ratings.index(rating)+1
+        context['Ratings'] = ratings
 
         context['JSData'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
-        #context['JSData'] = list(map(lambda x: x.mu, ratings))
-        #matches = Match.objects.filter(game=self.get_object())
-
-        #Ratings = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(context['Ratings'])))
 
         return context
 
@@ -212,8 +238,6 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
 
         context = super(LeaderBoardRating, self).get_context_data(**kwargs)
-        
-        #print("ID: ", kwargs.get('rating_id'))
 
         try:
             user = EloRating.objects.filter(game = self.get_object(), player = self.kwargs['rating_id'])[0]
@@ -232,13 +256,25 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         context['rating']  = round(expose(Rating(mu=user.mu, sigma=user.sigma)))
         context['username'] = user.player.username
 
-        recentsize = 1
+        recentsize = 5
         recentmatches = islice(list(matches), 0, recentsize)
         context['matches'] = recentmatches
 
-        prev = previousRatings(context['rating'], user.player, matches)
-        recentchange = context['rating'] - prev[min(len(prev)-1, recentsize)]
-        context['recent'] = recentchange
+        prev, wins = previousRatings(context['rating'], user.player, matches)
+        if len(matches) > 1:
+            for match in matches:
+                match.change = prev[list(matches).index(match)] - prev[list(matches).index(match)+1]
+
+        else:
+            prev = [context['rating']]     
+            matches[0].change = context['rating']           
+        # recentchange = context['rating'] - prev[min(len(prev)-1, recentsize)]
+        # context['recent'] = recentchange
+
+        context['wins'] = wins[0]
+        context['losses'] = wins[1]
+        context['draws'] = wins[2]
+        context['JSData'] = prev
 
         return context
 

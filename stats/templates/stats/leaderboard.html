@@ -40,6 +40,7 @@
 {% block content %}
 
 <div class="content-section">
+    <h1 style="text-align: center;">Rating distribution</h1>
     <svg class="main-vis" id="visualization" height="200" width="100%"></svg>
     <script>distributionGraph({{ JSData }}, "#visualization")</script>
 </div>
@@ -63,20 +64,20 @@
                     <th>{{rating.position}}</th>
                     <th class="thName"><a href="{% url 'stats-leaderboard-rating' object.slug rating.url %}">{{rating.player.username}}</a></th>
                     <th>{% if rating.expose %} {{ rating.expose|floatformat:0 }} {% else %}1000{% endif %}</th>
-                    {% if rating.recent_rating_change %}
-                        {% if player.recent_rating_change > 0 %}
-                            <th class="thPositive">{{ player.recent_rating_change}}</th>
-                        {% elif player.recent_rating_change < 0 %}
-                            <th class="thNegative">{{ player.recent_rating_change}}</th>
+                    {% if rating.recent %}
+                        {% if rating.recent > 0 %}
+                            <th class="thPositive">+{{ rating.recent|floatformat:0}}</th>
+                        {% elif rating.recent < 0 %}
+                            <th class="thNegative">{{ rating.recent|floatformat:0}}</th>
                         {% else %}
-                            <th>{{ player.recent_rating_change }}</th>
+                            <th>{{ rating.recent }}</th>
                         {% endif %}
                     {% else %}
                         <th class="thPositive">+1000</th>
                     {% endif %}
 
-                    <th>{% if player.wins %}{{player.wins}}{% else %}0{% endif %}</th>
-                    <th>{% if player.losses %}{{player.losses}}{% else %}0{% endif %}</th>
+                    <th>{% if rating.wins %}{{rating.wins}}{% else %}0{% endif %}</th>
+                    <th>{% if rating.losses %}{{rating.losses}}{% else %}0{% endif %}</th>
 
                 </tr>
             {% endfor %}
