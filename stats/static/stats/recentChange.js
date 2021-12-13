@@ -63,14 +63,14 @@ function recentChangeGraph(changes=[], currentRating = 1000, svgidentifier){
 
 
     
-        .each(function(){
-            temp = this.parentNode
-            a = document.createElementNS("http://www.w3.org/2000/svg","a")
-            a.setAttribute("href", "/game/test/example/123")
-            temp.replaceChild(a, this)
-            a.appendChild(this)
+        // .each(function(){
+        //     temp = this.parentNode
+        //     a = document.createElementNS("http://www.w3.org/2000/svg","a")
+        //     a.setAttribute("href", "/game/test/example/123")
+        //     temp.replaceChild(a, this)
+        //     a.appendChild(this)
             
-        })
+        // })
 
         .append("title")
             .text(function(d){

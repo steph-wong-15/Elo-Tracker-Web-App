@@ -9,6 +9,8 @@ from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.http import Http404
+
 
 from itertools import islice
 from trueskill import Rating, rate_1vs1, expose, setup
@@ -243,8 +245,8 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
             user = EloRating.objects.filter(game = self.get_object(), player = self.kwargs['rating_id'])[0]
         except IndexError:
             #404, user has no rating for this game or does not exist
-            return()
-
+            raise Http404("Rating does not exist")
+            return {}
         #find the users position on the ladder
         position = list(EloRating.objects.filter(game = self.get_object())).index(user) + 1
 

@@ -43,6 +43,8 @@
 <div class="content-section">
     <h1>{{username}} | Rating: {{rating|floatformat:0}} | Position: #{{position}}</h1>
     <h3 title="Wins/Losses/Draws">{{wins}}/{{losses}}/{{draws}}</h3>
+    <svg class="main-vis" id="visualization" height="200" width="100%"></svg>
+    <script>recentChangeGraph({{ JSData }}, {{rating}},"#visualization")</script>
 </div>
 
 <h3>Recent Matches</h3>
