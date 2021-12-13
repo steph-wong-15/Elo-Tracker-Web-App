@@ -46,11 +46,11 @@ def homeRefresh(request, slug):
             top_ratings = list(EloRating.objects.filter(game = game.id).order_by('-mu')[:3].values_list('player', flat=True))
             for player in top_ratings:
                 Leaders.append(User.objects.get(id=player))
-            Recent_Matches = Match.objects.filter(game = game.id, match_date__lt=date.today()).order_by('match_date')[:5]
+            Recent_Matches = Match.objects.filter(game = game.id, match_date__lte=date.today()).order_by('-match_date')[:5]
             Recent_Players = []
             for match in Recent_Matches:
                 Recent_Players.append([match.player_A.username,match.player_B.username])
-            Upcoming_Matches = Match.objects.filter(game = game.id, match_date__gte=date.today()).order_by('match_date')[:5]
+            Upcoming_Matches = Upcoming.objects.filter(game = game.id, date__gte=date.today()).order_by('date')[:5]
             context['Leaders'] = Leaders
             context['Histories'] = Recent_Matches
             context['Upcomings'] = Upcoming_Matches
