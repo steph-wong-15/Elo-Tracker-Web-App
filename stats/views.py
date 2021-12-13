@@ -288,7 +288,7 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         context['wins'] = wins[0]
         context['losses'] = wins[1]
         context['draws'] = wins[2]
-        context['JSData'] = list(reversed(change))#list(reversed(prev))
+        context['JSData'] = change
 
         return context
 
