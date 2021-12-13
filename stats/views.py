@@ -289,6 +289,7 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
         for rating in ratings:
             rating.position = ratings.index(rating)+1
         context['Ratings'] = ratings
+        context['Game'] = self.get_object()
 
         context['JSData'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
 

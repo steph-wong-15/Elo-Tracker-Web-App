@@ -28,10 +28,9 @@
         {% endfor %}
         </div>
     {% else %}
-        <div>
-            <h1>Welcome to Elo Tracker</h1>
-            <p>Matchmaking rating tracker for office games</p>
-        </div>
+    <div class="container">
+        <body id="bg" style="background-image: url({% static "images/homepage.jpg" %});"></body>
+    </div>
     {% endif %}
 {% endblock content %}
 {% block leaderboard %}

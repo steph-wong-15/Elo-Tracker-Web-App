@@ -1,42 +1,38 @@
 {% extends "stats/base.html" %}
 {% block content %}
-    <div class="content-section">
-        <div class="row">
-            <div class="col-6">
-                <h2>{{game_detail.title}}</h2>
-            </div>
-            <div class="col-6 text-right">
-                {% if EloRating != None %}
-                <a href="{% url 'stats-results' slug=game_detail.slug %}" class="btn btn-primary">Add Result</a>
-                {% else %}
-                <a href="{% url 'stats-joingame' slug=game_detail.slug %}" class="btn btn-primary">Join Game</a>
-                {% endif %}
-            </div>
+    <div class="row">
+        <div class="col-6">
+            <h2>{{game_detail.title}}</h2>
         </div>
-        <hr />
-        <div>
-            <table class="table table-hover table-sm table-bordered">
-                <thead class="thead-light">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Player 1 (Elo)</th>
-                        <th scope="col">Player 2 (Elo)</th>
-                        <th scope="col">Score</th>
-                        <th scope="col">Match Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for match in Matches %}
-                    <tr>
-                        <td>{{ forloop.counter }}</th>
-                        <td>{{ match.player_A }} ({{ match.elo_A }})</td>
-                        <td>{{ match.player_B }} ({{ match.elo_B }})</td>
-                        <td>{{ match.score_A }} - {{ match.score_B }}</td>
-                        <td>{{ match.match_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-6 text-right">
+            {% if EloRating != None %}
+            <a href="{% url 'stats-results' slug=game_detail.slug %}" class="btn btn-primary">Add Result</a>
+            {% else %}
+            <a href="{% url 'stats-joingame' slug=game_detail.slug %}" class="btn btn-primary">Join Game</a>
+            {% endif %}
         </div>
     </div>
+    <hr />
+    <table class="table table-hover table-sm table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Player 1 (Elo)</th>
+                <th scope="col">Player 2 (Elo)</th>
+                <th scope="col">Score</th>
+                <th scope="col">Match Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in Matches %}
+            <tr>
+                <td>{{ forloop.counter }}</th>
+                <td>{{ match.player_A }} ({{ match.elo_A }})</td>
+                <td>{{ match.player_B }} ({{ match.elo_B }})</td>
+                <td>{{ match.score_A }} - {{ match.score_B }}</td>
+                <td>{{ match.match_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock content %}

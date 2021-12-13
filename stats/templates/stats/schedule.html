@@ -3,7 +3,7 @@
 {% block content %}
 
     {% if user.is_authenticated %}
-    `<style type="text/css">
+    <style type="text/css">
         div.filter{
         border-radius: 25px;
         padding: 25px 25px 25px 25px;
@@ -20,42 +20,51 @@
         }
     </style>
         <div class="row mb-3">
-            <div class="col text-left">
+            <div class="col-8">
+                <h3>Match Scheduler</h3>
+            </div>
+            <div class="col text-right">
                 <a href="{% url 'stats-newmatch' %}" class="btn btn-primary">Schedule a Match</a>
             </div>
         </div>
+        <hr />
         <form method="get">
             <div class="filter">
-                <h5>Filter</h5>
                 <div class="row">
-                    <div class="form-group col-sm-4 col-md-3">
+                    <div class="form-group col-5">
                         {{ filter.form.game.label_tag }}
                         {% render_field filter.form.game class="form-control" %}
                     </div>
-                    
-                    <div class="form-group col-sm-4 col-md-3">
-                        {{ filter.form.date.label_tag }}
+                    <div class="form-group col-5">
+                        {{ filter.form.date.label_tag }} (MM/DD/YYYY)
                         {% render_field filter.form.date class="form-control" %}
                     </div>
+                    <div class="form-group col-2">
+                        <br />
+                        <button type="submit" class="btn btn-primary"> Search</button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary"> Search</button>
+                
             </div>
         </form>
 
         <br><br>
             {% if filter.qs %}
-                <table class = "table-bordered">
-                    <tr class='header'>
-                        <th>Match Up</th>
-                        <th>Game</th>
-                        <th>Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                    </tr>
+                <table class = "table table-hover table-sm table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Match Up</th>
+                            <th>Game</th>
+                            <th>Date</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th></th>
+                        </tr>
+                    </thead>
             {% endif %}
                 {% for upcoming in filter.qs %}
                 <tr>
-                    <td>{{upcoming.player_1}}  VS {{upcoming.player_2}}</td>
+                    <td>{{upcoming.player_1}}  vs {{upcoming.player_2}}</td>
                     <td>{{upcoming.game.title}}</td>
                     <td>{{upcoming.date}}</td>
                     <td>{{upcoming.start_time}}</td>
