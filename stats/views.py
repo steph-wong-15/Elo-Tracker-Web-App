@@ -12,7 +12,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
-from datetime import date
+from datetime import date, datetime
 from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -213,6 +213,7 @@ def joinGame(request, **kwargs):
         rating.save()
 
     return redirect('stats-home')
+    
 class UpcomingUpdateView(SuccessMessageMixin, UpdateView):
     model = Upcoming
     template_name = 'stats/updatematch.html'
@@ -224,8 +225,9 @@ class UpcomingDeleteView(DeleteView):
     template_name = 'stats/deletematch.html'
     success_url = reverse_lazy('stats-schedule')
 
+#referenced https://simpleisbetterthancomplex.com/tutorial/2016/11/28/how-to-filter-querysets-dynamically.html
 def search(request):
-    upcoming_list = Upcoming.objects.all()
+    today = date.today()
+    upcoming_list = Upcoming.objects.filter(date__gte=today)
     upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
     return render(request, 'stats/schedule.html', {'filter': upcoming_filter})
-    
