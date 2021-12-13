@@ -41,7 +41,8 @@
 {% endif %}
 
 <div class="content-section">
-    <h1>{{username}} {{rating|floatformat:0}} #{{position}}</h1>
+    <h1>{{username}} | Rating: {{rating|floatformat:0}} | Position: #{{position}}</h1>
+    <h3 title="Wins/Losses/Draws">{{wins}}/{{losses}}/{{draws}}</h3>
 </div>
 
 <h3>Recent Matches</h3>
@@ -59,7 +60,7 @@
         {% if matches %}
             {% for match in matches %}
                 <tr>
-                    <th>{{ match.id }}</th>
+                    <th title="{{match.match_date}}">{{ match.id }}</th>
                     {% if match.result %}
                         {% if match.result == 'W' %}
                             <th class="thPositive">Win</th>

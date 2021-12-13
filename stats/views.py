@@ -204,11 +204,11 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
         recentsize = 1
 
         for rating in ratings:
-            rating.expose = expose(Rating(mu=rating.mu, sigma=rating.sigma))
+            rating.expose = round(expose(Rating(mu=rating.mu, sigma=rating.sigma)))
             rating.url = str(rating.player_id)
 
             prev, wins = previousRatings(rating.expose, rating.player, matches)
-            recentchange = rating.expose - prev[min(len(prev)-1, recentsize)]
+            recentchange = round(rating.expose - prev[min(len(prev)-1, recentsize)])
             rating.recent = recentchange
             rating.wins = wins[0]
             rating.losses = wins[1]
@@ -249,7 +249,7 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         position = list(EloRating.objects.filter(game = self.get_object())).index(user) + 1
 
         #Find all matches in which user was a player
-        matches = Match.objects.filter(Q(player_B = user.id) | Q(player_A = user.id)).order_by('-match_date')
+        matches = Match.objects.filter(Q(player_B = user.player) | Q(player_A = user.player)).order_by('match_date', '-id')
 
         
         context['position'] = position
@@ -260,14 +260,17 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         recentmatches = islice(list(matches), 0, recentsize)
         context['matches'] = recentmatches
 
-        prev, wins = previousRatings(context['rating'], user.player, matches)
+        prev, wins = previousRatings(context['rating'], user.player, list(matches))
         if len(matches) > 1:
             for match in matches:
                 match.change = prev[list(matches).index(match)] - prev[list(matches).index(match)+1]
 
-        else:
+        elif len(matches) == 1:
             prev = [context['rating']]     
             matches[0].change = context['rating']           
+
+        else:
+            prev = [0]
         # recentchange = context['rating'] - prev[min(len(prev)-1, recentsize)]
         # context['recent'] = recentchange
 
