@@ -136,14 +136,12 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
 def company(request):
     if request.method == 'POST':
         if 'promoteUser' in request.POST:
-            print(request.POST)
             form = PromoteAdminForm(request.user.profile.company,request.POST)
             if form.is_valid():
                 user=form.cleaned_data.get('chosenUser')
                 request.user.profile.company.admins.add(user.user)
             return HttpResponseRedirect(request.path_info)
         else:
-            print(request.POST)
             form = companyInviteForm(request.POST)
             if form.is_valid():
                 inviteCode=form.cleaned_data.get('inviteCode')
@@ -245,7 +243,6 @@ class UpcomingDeleteView(DeleteView):
 
 def search(request):
     if( request.user.is_authenticated):
-        print( request.user.profile.company)
         if(not request.user.profile.company):
             return redirect('stats-company')
 
