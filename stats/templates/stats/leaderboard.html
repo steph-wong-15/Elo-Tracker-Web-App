@@ -52,7 +52,7 @@
                 <th title="Player position" style="text-align: initial;"><span style="font-weight: bold"></span></th>
                 <th title="Player name" style="text-align: initial; width: 30%;"><span style="font-weight: bold">Player</span></th>
                 <th title="Player's current rating"><span style="font-weight: bold">Rating</span></th>
-                <th title="Rating change over the last 20 games"><span style="font-weight: bold">Recent</span></th>
+                <th title="Rating change over the last 3 games"><span style="font-weight: bold">Recent</span></th>
                 <th title="Player's total wins"><span style="font-weight: bold">Wins</span></th>
                 <th title="Player's total losses"><span style="font-weight: bold">Losses</span></th>
             </tr>
@@ -63,7 +63,7 @@
                 <tr>
                     <th>{{rating.position}}</th>
                     <th class="thName"><a href="{% url 'stats-leaderboard-rating' object.slug rating.url %}">{{rating.player.username}}</a></th>
-                    <th>{% if rating.expose %} {{ rating.expose|floatformat:0 }} {% else %}1000{% endif %}</th>
+                    <th>{% if rating.expose %} {{ rating.expose|floatformat:0 }} {% else %}0{% endif %}</th>
                     {% if rating.recent %}
                         {% if rating.recent > 0 %}
                             <th class="thPositive">+{{ rating.recent|floatformat:0}}</th>
@@ -73,7 +73,7 @@
                             <th>{{ rating.recent }}</th>
                         {% endif %}
                     {% else %}
-                        <th class="thPositive">+1000</th>
+                        <th>0</th>
                     {% endif %}
 
                     <th>{% if rating.wins %}{{rating.wins}}{% else %}0{% endif %}</th>

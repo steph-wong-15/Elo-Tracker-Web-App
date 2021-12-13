@@ -157,7 +157,7 @@ def joinGame(request, **kwargs):
 #returns a list of previous ratings
 def previousRatings(currentRating, player, matchList):
     ratings = []
-    ratings.append(round(currentRating))
+    
 
     wins = 0
     losses = 0
@@ -187,6 +187,9 @@ def previousRatings(currentRating, player, matchList):
                 draws += 1
                 match.result = 'D'
                 
+    ratings.append(round(currentRating))
+
+    ratings = list(reversed(ratings))
 
     return ratings, [wins, losses, draws]
 
@@ -203,7 +206,7 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
         ratings = EloRating.objects.filter(game=self.get_object())
         
         matches = Match.objects.filter(game=self.get_object())
-        recentsize = 1
+        recentsize = 3
 
         for rating in ratings:
             rating.expose = round(expose(Rating(mu=rating.mu, sigma=rating.sigma)))
@@ -251,35 +254,41 @@ class LeaderBoardRating(DetailView, LoginRequiredMixin):
         position = list(EloRating.objects.filter(game = self.get_object())).index(user) + 1
 
         #Find all matches in which user was a player
-        matches = Match.objects.filter(Q(player_B = user.player) | Q(player_A = user.player)).order_by('match_date', '-id')
+        matches = Match.objects.filter(Q(player_B = user.player) | Q(player_A = user.player)).order_by('match_date', 'id')
 
         
         context['position'] = position
         context['rating']  = round(expose(Rating(mu=user.mu, sigma=user.sigma)))
         context['username'] = user.player.username
 
-        recentsize = 5
+        recentsize = 20
         recentmatches = islice(list(matches), 0, recentsize)
         context['matches'] = recentmatches
 
+        change = []
+
         prev, wins = previousRatings(context['rating'], user.player, list(matches))
+        
+        prev = list(reversed(prev))
+
         if len(matches) > 1:
             for match in matches:
-                match.change = prev[list(matches).index(match)] - prev[list(matches).index(match)+1]
+                match.change = prev[list(matches).index(match)+1] - prev[list(matches).index(match)]
+                change.append(match.change)
 
         elif len(matches) == 1:
-            prev = [context['rating']]     
+            change = [context['rating']] 
+            #prev = [context['rating']]     
             matches[0].change = context['rating']           
-
+            
         else:
-            prev = [0]
-        # recentchange = context['rating'] - prev[min(len(prev)-1, recentsize)]
-        # context['recent'] = recentchange
+            #prev = [0]
+            change = [0]
 
         context['wins'] = wins[0]
         context['losses'] = wins[1]
         context['draws'] = wins[2]
-        context['JSData'] = prev
+        context['JSData'] = list(reversed(change))#list(reversed(prev))
 
         return context
 

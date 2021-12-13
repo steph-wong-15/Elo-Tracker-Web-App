@@ -17,6 +17,7 @@
                     <div class="card-body">
                         <h4 class="card-title">{{game.title}}</h4>
                         <a href="{% url 'stats-game' slug=game.slug %}" class="btn btn-primary">See Results</a>
+                        <a href="{% url 'stats-leaderboard' game.slug %}" class="btn btn-primary">See Leaderboards</a>
                     </div>
                 </div>
             </div>
