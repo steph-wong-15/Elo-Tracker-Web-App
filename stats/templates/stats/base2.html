@@ -11,15 +11,6 @@
 
         <link rel="stylesheet" type="text/css" href="{% static 'stats/main.css' %}">
 
-        <style type="text/css">
-            @media screen and (min-width: 900px){
-                .container-fluid.custom-container {
-                    margin-right: 20%;
-                    margin-left: 20%;
-                }
-            }
-        </style>
-
         {% if title %}
             <title>Stats - {{ title }}</title>
         {% else %}
@@ -59,7 +50,7 @@
           </header>
           <main role="main" class="container">
             <div class="row">
-              <div class="custom-container container-fluid">
+              <div class="col-md-8">
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }}">
@@ -69,6 +60,14 @@
                 {% endif %}
                 {% block content %}{% endblock %}
               </div>
+              {% if user.is_authenticated %}
+              <div class="col-md-4">
+              {% block leaderboard %}
+              {% endblock %}
+              {% block content_right %}
+              {% endblock %}
+              </div>
+              {% endif %}
             </div>
           </main>
         
