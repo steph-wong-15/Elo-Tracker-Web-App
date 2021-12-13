@@ -5,15 +5,12 @@
     {% if user.is_authenticated %}
     <style type="text/css">
         div.filter{
-        border-radius: 25px;
-        padding: 25px 25px 25px 25px;
-        border: 1px solid #000;
+            border-radius: 8px;
+            padding: 25px 25px 25px 25px;
+            border: 2px solid #5f788a;
         }
         th{
-        border-right-width:medium;
-        border-right-color:#000;
-        border-right-style:groove;
-        width: 20%;
+            width: 20%;
         }   
         table{
             border-collapse: collapse;
@@ -36,7 +33,7 @@
                         {% render_field filter.form.game class="form-control" %}
                     </div>
                     <div class="form-group col-5">
-                        {{ filter.form.date.label_tag }} (MM/DD/YYYY)
+                        {{ filter.form.date.label_tag }}
                         {% render_field filter.form.date class="form-control" %}
                     </div>
                     <div class="form-group col-2">
