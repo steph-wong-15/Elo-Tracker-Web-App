@@ -2,11 +2,13 @@
 {% block content %}
     <div class="content-section">
         <style type="text/css">
+            th {
+              padding: 0 20px;
+            }
             td {
               padding: 0 20px;
             }
             tr.header{
-                background-color: #96D4D4;
                 padding: 25px 50px 75px 100px;
             }
             table{
@@ -30,4 +32,9 @@
             </tr>
         </table>
     </div>
+    <div class="col text-left">
+        <a href="{% url 'stats-updatematch' object.id %}" class="btn btn-primary">Update Match</a>
+        <a href="{% url 'stats-deletematch' object.id %}" class="btn btn-outline-info" >Delete Match</a>
+    </div>
+</div>
 {% endblock content %}

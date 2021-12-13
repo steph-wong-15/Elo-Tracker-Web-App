@@ -1,0 +1,14 @@
+{% extends "stats/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="col text-center">
+                <strong>Confirm you would like to delete {{object.game}} on {{object.date}}</strong><br><br>
+                <button class="btn btn-primary" type="submit">Delete</button>
+                <a href="{% url 'stats-upcoming' object.id %}" class="btn btn-outline-info" >Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
