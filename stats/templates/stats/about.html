@@ -1,7 +1,9 @@
 {% extends "stats/base.html" %}
 {% block content %}
-    <h1>About Page</h1>
-    <button onClick="alert('hello');">
-        Click Me - I run Javascript
-    </button>
+    <h1>Welcome to Elo Tracker</h1>
+    <p>Here you can create a joinable company for you and your collegues to easily track everyone performance in all your favourite office games.</p>
+
+    {% if not user.is_authenticated %}
+    <p>Login and register for a company to get started</p>
+    {% endif %}
 {% endblock content %}
