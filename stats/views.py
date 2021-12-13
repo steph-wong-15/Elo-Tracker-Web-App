@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import Http404
 from itertools import islice
-from datetime import date
+from datetime import date, datetime
 from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -371,6 +371,7 @@ class UpcomingDeleteView(DeleteView):
     success_url = reverse_lazy('stats-schedule')
 
 def search(request):
-    upcoming_list = Upcoming.objects.all()
+    today = date.today()
+    upcoming_list = Upcoming.objects.filter(date__gte=today)
     upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
     return render(request, 'stats/schedule.html', {'filter': upcoming_filter})
