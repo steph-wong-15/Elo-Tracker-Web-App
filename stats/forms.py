@@ -11,7 +11,7 @@ class TimeInput(forms.TimeInput):
 class GameRegisterForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['title', 'company', 'image']
+        fields = ['title', 'image']
 
 class AddResultsForm(forms.ModelForm):
     class Meta:
