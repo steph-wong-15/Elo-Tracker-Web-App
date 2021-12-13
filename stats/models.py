@@ -23,10 +23,13 @@ class Game(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        slug_str = "%s_%s" % (self.title, self.company)
+        slug_str = "%s" % (self.title)
         game_objects = Game.objects.filter(slug=slug_str)
-        if (game_objects.exists()):
-            slug_str = "%s_%s" % (self.title, game_objects.count() + 1)
+        count = game_objects.count()
+        while (game_objects.exists()):
+            count = count + 1
+            slug_str = "%s_%s" % (self.title, count)
+            game_objects = Game.objects.filter(slug=slug_str)
         self.slug = slugify(slug_str, allow_unicode=True)
         return super(Game, self).save(*args, **kwargs)
 
