@@ -13,10 +13,9 @@
         <a href="{% url 'stats-home-refresh' slug=game.slug%}">
             <div class="col-12 col-lg-6" style="margin-bottom: 30px;">
                 <div class="card mx-auto" style="width: 300px;">
-                    <img class="card-img-top" src="{{game.image.url}}" alt="Card image">
-                    <div class="card-body">
-                        <h4 class="card-title">{{game.title}}</h4>
-                        <a href="{% url 'stats-game' slug=game.slug %}" class="btn btn-primary">See Results</a>
+                    <a href="{% url 'stats-game' slug=game.slug %}"><img class="card-img-top" src="{{game.image.url}}" alt="Card image"></a>
+                    <div class="card-body text-center">
+                        <a href="{% url 'stats-game' slug=game.slug %}"><h4 class="card-title">{{game.title}}</h4></a>
                         <a href="{% url 'stats-leaderboard' game.slug %}" class="btn btn-primary">See Leaderboards</a>
                     </div>
                 </div>
