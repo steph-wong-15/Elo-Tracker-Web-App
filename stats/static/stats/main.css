@@ -82,3 +82,8 @@ body {
   .account-heading {
     font-size: 2.5rem;
   }
+
+  #bg{
+    background-repeat: no-repeat;
+    background-size: 100%
+  }
