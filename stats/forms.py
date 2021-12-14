@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import fields
 from .models import Company, Game, Match, Upcoming, EloRating
-from users.models import User
+from users.models import User, Profile
 from django.forms import ModelForm
 
 class DateInput(forms.DateInput):
@@ -45,3 +45,12 @@ class AddUpcomingForm(forms.ModelForm):
             'start_time': TimeInput(),
             'end_time': TimeInput(),
         }
+
+    def __init__(self, *args, **kwargs):
+        company = kwargs.pop('company', None)
+        super().__init__(*args, **kwargs)
+        
+        self.fields['game'].queryset = Game.objects.filter(company=company)
+        self.fields['player_1'].queryset = User.objects.filter(profile__in=(Profile.objects.filter(company=company)))
+        self.fields['player_2'].queryset = User.objects.filter(profile__in=(Profile.objects.filter(company=company)))
+        

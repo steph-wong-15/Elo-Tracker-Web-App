@@ -176,8 +176,9 @@ def schedule(request):
     return render(request, 'stats/schedule.html')
 
 def newmatch(request):
+    company = request.user.profile.company
     if request.method == 'POST':
-        form = AddUpcomingForm(request.POST)
+        form = AddUpcomingForm(request.POST, company=company)
 
         if form.is_valid():
             upcoming = form.cleaned_data
@@ -189,7 +190,7 @@ def newmatch(request):
 
             return redirect('stats-schedule')
     else:
-        form = AddUpcomingForm()
+        form = AddUpcomingForm(company=company)
     return render(request, 'stats/newmatch.html', {'form': form})
 
 class UpcomingList(ListView,LoginRequiredMixin):
