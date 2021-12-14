@@ -25,7 +25,7 @@ SECRET_KEY = ')u#-td@r@80@3m0g9b1u#h=xsu2i&n&fck0!%ay9e)lf4sdb4b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -80,8 +80,12 @@ WSGI_APPLICATION = 'stats_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'EloTracker',
+        'USER': 'EloTracker',
+        'PASSWORD': '123',
+        'HOST': 'db',  
+        'PORT': '3306',
     }
 }
 
@@ -126,6 +130,7 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 

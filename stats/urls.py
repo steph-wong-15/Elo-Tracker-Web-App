@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from django.conf.urls import url
 
 urlpatterns = [
     path('', views.home, name='stats-home'),
@@ -11,7 +10,7 @@ urlpatterns = [
     path('results/<slug:slug>/', views.results, name='stats-results'),
     path('createCompany/', views.createCompany, name='stats-createCompany'),
     path('company/', views.company, name='stats-company'),
-    url(r'^schedule/$', views.search, name='stats-schedule'),
+    path('schedule/', views.search, name='stats-schedule'),
     path('schedule/new/', views.newmatch, name='stats-newmatch'),
     path('joingame/<slug:slug>/', views.joinGame, name='stats-joingame'),
     path('game/<slug:slug>/leaderboard/', views.LeaderBoardList.as_view(), name='stats-leaderboard'),

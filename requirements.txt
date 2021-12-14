@@ -3,5 +3,6 @@ django-cors-headers
 django-crispy-forms
 django-filter
 django-widget-tweaks
-
+pillow==4
+mysqlclient
 trueskill
