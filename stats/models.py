@@ -17,14 +17,24 @@ class Company(models.Model):
 class Game(models.Model):
     title = models.CharField(max_length=100)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    slug = models.SlugField(max_length=50, null=True)
+    slug = models.SlugField(max_length=50, null=True, unique=True)
     image = models.ImageField(default='game_default.png', upload_to='game_pics')
     
     def __str__(self):
         return f'{self.title}-{self.company}'
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title, allow_unicode=True)
+        print('here')
+        title = self.title.lower()
+        slug_str = "%s" % (title)
+        game_objects = Game.objects.filter(slug=title)
+        count = game_objects.count()
+        while (game_objects.exists()):
+            count = count + 1
+            slug_str = "%s_%s" % (title, str(count))
+            print(slug_str)
+            game_objects = Game.objects.filter(slug=slug_str)
+        self.slug = slugify(slug_str, allow_unicode=True)
         return super(Game, self).save(*args, **kwargs)
 
 class Match(models.Model):
