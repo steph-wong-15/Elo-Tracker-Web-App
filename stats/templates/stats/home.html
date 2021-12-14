@@ -1,22 +1,26 @@
-{% extends "stats/base.html" %}
+{% extends "stats/base2.html" %}
 {% load static %}
 {% block content %}
 
     {% if user.is_authenticated %}
         <div class="row mb-3">
-            <div class="col text-center">
+            <div class="col-9">
+                <h2>Games</h2>
+            </div>
+            <div class="col-3">
                 <a href="{% url 'stats-newgame' %}" class="btn btn-primary">Create New Game</a>
             </div>
         </div>
+        <hr style="margin-bottom: 30px;" />
         <div class="row" display="flex">
         {% for game in Games %}
         <a href="{% url 'stats-home-refresh' slug=game.slug%}">
             <div class="col-12 col-lg-6" style="margin-bottom: 30px;">
                 <div class="card mx-auto" style="width: 300px;">
-                    <img class="card-img-top" src="{{game.image.url}}" alt="Card image">
-                    <div class="card-body">
-                        <h4 class="card-title">{{game.title}}</h4>
-                        <a href="{% url 'stats-game' slug=game.slug %}" class="btn btn-primary">See Results</a>
+                    <a href="{% url 'stats-game' slug=game.slug %}"><img class="card-img-top" src="{{game.image.url}}" alt="Card image"></a>
+                    <div class="card-body text-center">
+                        <a href="{% url 'stats-game' slug=game.slug %}"><h4 class="card-title">{{game.title}}</h4></a>
+                        <a href="{% url 'stats-leaderboard' game.slug %}" class="btn btn-primary">See Leaderboards</a>
                     </div>
                 </div>
             </div>
@@ -24,10 +28,9 @@
         {% endfor %}
         </div>
     {% else %}
-        <div>
-            <h1>Welcome to Elo Tracker</h1>
-            <p>Matchmaking rating tracker for office games</p>
-        </div>
+    <div class="container">
+        <body id="bg" style="background-image: url({% static "images/homepage.jpg" %});"></body>
+    </div>
     {% endif %}
 {% endblock content %}
 {% block leaderboard %}
@@ -51,35 +54,36 @@
 
 {% block content_right %}
             <div class="content-section">
-                <h3>Company Recent Matches</h3>
-                {% if Histories|length > 0 %}
-                    {% for match in Histories %}
-                            <p class='text-muted list-group-item'>
-                                {{ match.match_date}}
-                                <br />
-                                {{ match.player_A }}
-                                <br />
-                                {{ match.player_B }}
-                            </p>
-                    {% endfor %}
-                {% else %}
-                    <p class='text-muted'>No records found</p>
-                {% endif %}
-            </div>
-            <div class="content-section">
-                <h3>Company Upcomings</h3>
+                <h3>Upcoming Games</h3>
                 {% if Upcomings|length > 0 %}
                     {% for match in Upcomings %}
                         <p class='text-muted list-group-item'>
-                            {{ match.match_date}}
+                            {{ match.date}}
                             <br />
-                            {{ match.player_A }}
+                            {{ match.game.title }} 
                             <br />
-                            {{ match.player_B }}
+                            {{ match.player_1 }} - {{ match.player_2 }}
                         </p>
                     {% endfor %}
                 {% else %}
                     <p class='text-muted'>No records found</p>
                 {% endif %}
             </div>
+            <div class="content-section">
+                <h3>Recent Matches</h3>
+                {% if Histories|length > 0 %}
+                    {% for match in Histories %}
+                            <p class='text-muted list-group-item'>
+                                {{ match.match_date}}
+                                <br />
+                                {{ match.game.title }} 
+                                <br />
+                                {{ match.player_A }} - {{ match.player_B }}
+                            </p>
+                    {% endfor %}
+                {% else %}
+                    <p class='text-muted'>No records found</p>
+                {% endif %}
+            </div>
+            
 {% endblock %}

@@ -4,7 +4,7 @@ from django.contrib import messages
 from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, companyInviteForm
 from .models import Company, Game,Match
 from django.utils.timezone import get_default_timezone_name
-from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm
+from .forms import GameRegisterForm,AddResultsForm,CreateCompanyForm, AddUpcomingForm,PromoteAdminForm
 from .models import Company, Game, Match, Upcoming, EloRating
 from users.models import User, Profile
 from django.views.generic.detail import DetailView
@@ -12,7 +12,10 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
-from datetime import date
+from django.db.models import Q
+from django.http import Http404
+from itertools import islice
+from datetime import date, datetime
 from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -46,11 +49,11 @@ def homeRefresh(request, slug):
             top_ratings = list(EloRating.objects.filter(game = game.id).order_by('-mu')[:3].values_list('player', flat=True))
             for player in top_ratings:
                 Leaders.append(User.objects.get(id=player))
-            Recent_Matches = Match.objects.filter(game = game.id, match_date__lt=date.today()).order_by('match_date')[:5]
+            Recent_Matches = Match.objects.filter(game = game.id, match_date__lte=date.today()).order_by('-match_date')[:3]
             Recent_Players = []
             for match in Recent_Matches:
                 Recent_Players.append([match.player_A.username,match.player_B.username])
-            Upcoming_Matches = Match.objects.filter(game = game.id, match_date__gte=date.today()).order_by('match_date')[:5]
+            Upcoming_Matches = Upcoming.objects.filter(game = game.id, date__gte=date.today()).order_by('date')[:3]
             context['Leaders'] = Leaders
             context['Histories'] = Recent_Matches
             context['Upcomings'] = Upcoming_Matches
@@ -66,10 +69,14 @@ def newgame(request):
     if request.method == 'POST':
         form = GameRegisterForm(request.POST)
         if form.is_valid():
+            form.instance.company = request.user.profile.company
             form.save()
             messages.success(request, f'Your game has been created!')
             return redirect('stats-home')
     else:
+        if( request.user.is_authenticated):
+            if(not request.user.profile.company):
+                return redirect('stats-company')
         form = GameRegisterForm()
     return render(request, 'stats/newgame.html', {'form': form})
 
@@ -93,7 +100,7 @@ def results(request, **kwargs):
     game = Game.objects.get(slug=slug)
 
     if request.method == 'POST':
-        form = AddResultsForm(request.POST)
+        form = AddResultsForm(request.POST, game=game)
 
         if form.is_valid():
             player_A = EloRating.objects.get(player = form.cleaned_data['player_A'], game = game)
@@ -120,7 +127,7 @@ def results(request, **kwargs):
             messages.success(request, f'Your match results were added!')
             return redirect('stats-home')
     else:
-        form = AddResultsForm()
+        form = AddResultsForm(game=game)
     return render(request, 'stats/results.html',{'form': form})
 
 class ResultsDetailView(DetailView, LoginRequiredMixin):
@@ -132,23 +139,37 @@ class ResultsDetailView(DetailView, LoginRequiredMixin):
 @login_required
 def company(request):
     if request.method == 'POST':
-        form = companyInviteForm(request.POST)
-        if form.is_valid():
-            inviteCode=form.cleaned_data.get('inviteCode')
-            companyQuery = Company.objects.filter(invite_code=inviteCode)
-            if companyQuery:
-                request.user.profile.company=companyQuery.get()
-                request.user.profile.save()
-                messages.info(request,f'Successully registered with company '+ companyQuery.get().name)
-                return HttpResponseRedirect(request.path_info)
-            else: 
-                messages.error(request,f'Invite code not valid')
-        return render(request, 'stats/company.html',{'form':form})
+        if 'promoteUser' in request.POST:
+            form = PromoteAdminForm(request.user.profile.company,request.POST)
+            if form.is_valid():
+                user=form.cleaned_data.get('chosenUser')
+                request.user.profile.company.admins.add(user.user)
+            return HttpResponseRedirect(request.path_info)
+        else:
+            form = companyInviteForm(request.POST)
+            if form.is_valid():
+                inviteCode=form.cleaned_data.get('inviteCode')
+                companyQuery = Company.objects.filter(invite_code=inviteCode)
+                if companyQuery:
+                    request.user.profile.company=companyQuery.get()
+                    request.user.profile.save()
+                    messages.info(request,f'Successully registered with company '+ companyQuery.get().name)
+                    return HttpResponseRedirect(request.path_info)
+                else: 
+                    messages.error(request,f'Invite code not valid')
+            return render(request, 'stats/company.html',{'form':form})
     else:
         company = request.user.profile.company
+        admins=[]
+        if company:
+            admins=company.admins.all()
+        isAdmin = request.user in admins
         users = Profile.objects.all().filter(company=company)
         form = companyInviteForm()
-        return render(request, 'stats/company.html',{'company': company,'users':users,'form':form})
+        adminForm=None
+        if(isAdmin):
+            adminForm = PromoteAdminForm(company=company)
+        return render(request, 'stats/company.html',{'company': company,'admins':admins,'users':users,'form':form,'adminForm':adminForm,'isAdmin':isAdmin})
 
 def createCompany(request):
     if request.method == 'POST':
@@ -157,6 +178,7 @@ def createCompany(request):
             company = form.save()
             company.invite_code = get_random_string(length=32)
             company.save()
+            company.admins.add(request.user)
             request.user.profile.company=company
             request.user.save()
             messages.success(request, f'Your company has been created!')
@@ -172,8 +194,9 @@ def schedule(request):
     return render(request, 'stats/schedule.html')
 
 def newmatch(request):
+    company = request.user.profile.company
     if request.method == 'POST':
-        form = AddUpcomingForm(request.POST)
+        form = AddUpcomingForm(request.POST, company=company)
 
         if form.is_valid():
             upcoming = form.cleaned_data
@@ -185,7 +208,7 @@ def newmatch(request):
 
             return redirect('stats-schedule')
     else:
-        form = AddUpcomingForm()
+        form = AddUpcomingForm(company=company)
     return render(request, 'stats/newmatch.html', {'form': form})
 
 class UpcomingList(ListView,LoginRequiredMixin):
@@ -213,6 +236,148 @@ def joinGame(request, **kwargs):
         rating.save()
 
     return redirect('stats-home')
+
+#Takes the current rating and a sorted list of matches
+#returns a list of previous ratings
+def previousRatings(currentRating, player, matchList):
+    ratings = []
+    
+
+    wins = 0
+    losses = 0
+    draws = 0
+
+    for match in matchList:
+        if match.player_A == player:
+            ratings.append(round(match.elo_A))
+            if(match.score_A > match.score_B):
+                wins += 1
+                match.result = 'W'
+            elif(match.score_B > match.score_A):
+                losses += 1
+                match.result = 'L'
+            else:
+                draws += 1
+                match.result = 'D'
+        elif match.player_B == player:
+            ratings.append(round(match.elo_B))
+            if(match.score_B > match.score_A):
+                wins += 1
+                match.result = 'W'
+            elif(match.score_A > match.score_B):
+                losses += 1
+                match.result = 'L'
+            else:
+                draws += 1
+                match.result = 'D'
+                
+    ratings.append(round(currentRating))
+
+    ratings = list(reversed(ratings))
+
+    return ratings, [wins, losses, draws]
+
+
+class LeaderBoardList(DetailView, LoginRequiredMixin):
+
+    model = Game
+    context_object_name = 'player_list'
+    template_name = 'stats/leaderboard.html'
+    slug_url_kwarg = 'slug'
+
+    def get_context_data(self, **kwargs):
+        context = super(LeaderBoardList, self).get_context_data(**kwargs)
+        ratings = EloRating.objects.filter(game=self.get_object())
+        
+        matches = Match.objects.filter(game=self.get_object())
+        recentsize = 3
+
+        for rating in ratings:
+            rating.expose = round(expose(Rating(mu=rating.mu, sigma=rating.sigma)))
+            rating.url = str(rating.player_id)
+
+            prev, wins = previousRatings(rating.expose, rating.player, matches)
+            recentchange = round(rating.expose - prev[min(len(prev)-1, recentsize)])
+            rating.recent = recentchange
+            rating.wins = wins[0]
+            rating.losses = wins[1]
+            rating.draws = wins[2]
+
+        ratings = sorted(list(ratings), key=lambda x: x.expose, reverse=True)
+        
+        for rating in ratings:
+            rating.position = ratings.index(rating)+1
+        context['Ratings'] = ratings
+        context['Game'] = self.get_object()
+
+        context['JSData'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
+
+        return context
+
+
+
+class LeaderBoardRating(DetailView, LoginRequiredMixin):
+
+    model = Game
+    context_object_name = 'game'
+    template_name = 'stats/leaderboardProfile.html'
+    slug_url_kwarg = 'game'
+    
+    
+    
+    def get_context_data(self, **kwargs):
+
+        context = super(LeaderBoardRating, self).get_context_data(**kwargs)
+
+        try:
+            user = EloRating.objects.filter(game = self.get_object(), player = self.kwargs['rating_id'])[0]
+        except IndexError:
+            #404, user has no rating for this game or does not exist
+            raise Http404("Rating does not exist")
+            return {}
+        #find the users position on the ladder
+        position = list(EloRating.objects.filter(game = self.get_object())).index(user) + 1
+
+        #Find all matches in which user was a player
+        matches = Match.objects.filter(Q(player_B = user.player) | Q(player_A = user.player)).order_by('match_date', 'id')
+
+        
+        context['position'] = position
+        context['rating']  = round(expose(Rating(mu=user.mu, sigma=user.sigma)))
+        context['username'] = user.player.username
+
+        recentsize = 20
+        recentmatches = islice(list(matches), 0, recentsize)
+        context['matches'] = recentmatches
+
+        change = []
+
+        prev, wins = previousRatings(context['rating'], user.player, list(matches))
+        
+        prev = list(reversed(prev))
+
+        if len(matches) > 1:
+            for match in matches:
+                match.change = prev[list(matches).index(match)+1] - prev[list(matches).index(match)]
+                change.append(match.change)
+
+        elif len(matches) == 1:
+            change = [context['rating']] 
+            #prev = [context['rating']]     
+            matches[0].change = context['rating']           
+            
+        else:
+            #prev = [0]
+            change = [0]
+
+        context['wins'] = wins[0]
+        context['losses'] = wins[1]
+        context['draws'] = wins[2]
+        context['JSData'] = change
+
+        return context
+
+
 class UpcomingUpdateView(SuccessMessageMixin, UpdateView):
     model = Upcoming
     template_name = 'stats/updatematch.html'
@@ -225,7 +390,11 @@ class UpcomingDeleteView(DeleteView):
     success_url = reverse_lazy('stats-schedule')
 
 def search(request):
-    upcoming_list = Upcoming.objects.all()
+    if( request.user.is_authenticated):
+        if(not request.user.profile.company):
+            return redirect('stats-company')
+
+    today = date.today()
+    upcoming_list = Upcoming.objects.filter(date__gte=today)
     upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
     return render(request, 'stats/schedule.html', {'filter': upcoming_filter})
-    

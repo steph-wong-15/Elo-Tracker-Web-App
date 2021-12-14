@@ -1,29 +1,55 @@
 {% extends "stats/base.html" %}
 {% load static %}
 {% block content %}
+<h3>Company Details</h3>
+<hr />
 <div class="content-section">
     {%if company %}
             <div class="media">
-                <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
                 <div class="media-body">
-                    <h2 class="account-heading">{{ company.name }}</h2>
-                    <p class="text-secondary">admin: {{ company.admins.username }}</p>
-                    <h7>invite code:  {{ company.invite_code}}</h7>
-                    <h6>users registered: {{users|length}} </h6>
-                    <ul>
-                    {% for user in users %} 
-                    <li>{{user}}</li>
-                    {% endfor %}
-                    </ul>
+                    <div class="row">
+                        <div class="col-6">
+                            <h2 class="account-heading">{{ company.name }}</h2>
+                        </div>
+                        <div class="col-6 text-right">
+                            <p></p>
+                            <h5 class="text-secondary">Invite Code:  {{ company.invite_code}}</h5>
+                        </div>
+                    </div>
+                    <p class="text-secondary">admins:                     
+                        {% for admin in admins %}
+                            {{admin}}
+                        {% endfor %}
+                    </p>
+                    <hr />
+                    <h6>Registered Users: {{users|length}} </h6>
+                    <div class="container">
+                        <ul class="list-group list-group-flush">
+                            {% for user in users %} 
+                            <li class="list-group-item list-group-item-action">{{user}}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
                 </div>
             </div>
+            {% if isAdmin %}
+            <form method="POST">
+                    {% csrf_token %}
+                <div style="padding: 16px;" class="media-body">
+                    <h6>Promote user to admin</h6>
+                    {{adminForm}}
+                    <input class="btn btn-outline-secondary" name="promoteUser" type="submit"></input>
+                </div>
+            </form>
+            {% endif %}
 
     {% else %}
     <div class="row mb-3">
         <div class="col text-center">
             <h2>You are not registered with a company</h2>
         <form method="POST">
-            {% csrf_token %}
+        {% csrf_token %}
             <div style="padding: 16px;">
                 {{form}}
                 <button class="btn btn-outline-secondary" type="submit">Sign up</a>
