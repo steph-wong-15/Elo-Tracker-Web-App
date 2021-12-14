@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import Http404
 from itertools import islice
-from datetime import date
+from datetime import date, datetime
 from django.utils.crypto import get_random_string
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -49,11 +49,11 @@ def homeRefresh(request, slug):
             top_ratings = list(EloRating.objects.filter(game = game.id).order_by('-mu')[:3].values_list('player', flat=True))
             for player in top_ratings:
                 Leaders.append(User.objects.get(id=player))
-            Recent_Matches = Match.objects.filter(game = game.id, match_date__lte=date.today()).order_by('-match_date')[:5]
+            Recent_Matches = Match.objects.filter(game = game.id, match_date__lte=date.today()).order_by('-match_date')[:3]
             Recent_Players = []
             for match in Recent_Matches:
                 Recent_Players.append([match.player_A.username,match.player_B.username])
-            Upcoming_Matches = Upcoming.objects.filter(game = game.id, date__gte=date.today()).order_by('date')[:5]
+            Upcoming_Matches = Upcoming.objects.filter(game = game.id, date__gte=date.today()).order_by('date')[:3]
             context['Leaders'] = Leaders
             context['Histories'] = Recent_Matches
             context['Upcomings'] = Upcoming_Matches
@@ -69,6 +69,7 @@ def newgame(request):
     if request.method == 'POST':
         form = GameRegisterForm(request.POST)
         if form.is_valid():
+            form.instance.company = request.user.profile.company
             form.save()
             messages.success(request, f'Your game has been created!')
             return redirect('stats-home')
@@ -99,7 +100,7 @@ def results(request, **kwargs):
     game = Game.objects.get(slug=slug)
 
     if request.method == 'POST':
-        form = AddResultsForm(request.POST)
+        form = AddResultsForm(request.POST, game=game)
 
         if form.is_valid():
             player_A = EloRating.objects.get(player = form.cleaned_data['player_A'], game = game)
@@ -126,7 +127,7 @@ def results(request, **kwargs):
             messages.success(request, f'Your match results were added!')
             return redirect('stats-home')
     else:
-        form = AddResultsForm()
+        form = AddResultsForm(game=game)
     return render(request, 'stats/results.html',{'form': form})
 
 class ResultsDetailView(DetailView, LoginRequiredMixin):
@@ -193,8 +194,14 @@ def schedule(request):
     return render(request, 'stats/schedule.html')
 
 def newmatch(request):
+    company = request.user.profile.company
     if request.method == 'POST':
+<<<<<<< stats/views.py
         form = AddUpcomingForm(request.POST)
+=======
+        form = AddUpcomingForm(request.POST, company=company)
+
+>>>>>>> stats/views.py
         if form.is_valid():
             upcoming = form.cleaned_data
             subject = "Upcoming Match"
@@ -205,7 +212,7 @@ def newmatch(request):
 
             return redirect('stats-schedule')
     else:
-        form = AddUpcomingForm()
+        form = AddUpcomingForm(company=company)
     return render(request, 'stats/newmatch.html', {'form': form})
 
 class UpcomingList(ListView,LoginRequiredMixin):
@@ -305,6 +312,7 @@ class LeaderBoardList(DetailView, LoginRequiredMixin):
         for rating in ratings:
             rating.position = ratings.index(rating)+1
         context['Ratings'] = ratings
+        context['Game'] = self.get_object()
 
         context['JSData'] = list(map(lambda x: expose(Rating(mu=x.mu, sigma=x.sigma)), list(ratings)))
 
@@ -390,6 +398,7 @@ def search(request):
         if(not request.user.profile.company):
             return redirect('stats-company')
 
-    upcoming_list = Upcoming.objects.all()
+    today = date.today()
+    upcoming_list = Upcoming.objects.filter(date__gte=today)
     upcoming_filter = UpcomingFilter(request.GET, queryset=upcoming_list)
     return render(request, 'stats/schedule.html', {'filter': upcoming_filter})

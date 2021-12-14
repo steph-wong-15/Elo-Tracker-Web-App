@@ -1,9 +1,35 @@
 {% extends "stats/base.html" %}
 {% block content %}
-    <h1>Welcome to Elo Tracker</h1>
-    <p>Here you can create a joinable company for you and your collegues to easily track everyone performance in all your favourite office games.</p>
-
-    {% if not user.is_authenticated %}
-    <p>Login and register for a company to get started</p>
-    {% endif %}
+    <h3>About</h3>
+    <hr />
+    <div class="content-section">
+        <h5>Purpose</h5>
+        <hr />
+        <p>Elo Tracker is an application designed to calculate and track players' elo rating across various office games. 
+            It can be a fun way to track skill progression for office games such as table tennis or pool and see where you 
+            rank among your other coworkers. 
+        </p>
+        <br />
+        <h5>Registration</h5>
+        <hr />
+        <p>Creating an account is easy and only requires an email and password. Once logged in, you can register or join a company.
+            If registering a company, you can invite other users by using the provided invite code. The main features of the app can only be accessed as a member of a company.  
+        </p>
+        <br />
+        <h5>Creating/Playing a Game</h5>
+        <hr />
+        <p>Games can be created by pressing the "create new game" button on the home page. Once created, a user must join the game
+            to be registered as a player of the game. After joining, players will be assigned an elo rating and be able to participate in matches.
+        </p>
+        <p>After a game has been played, the results can be recorded in the detailed game view. (accessed by clicking on the game image or name)
+            The Elo rating will automatically be calculated and displayed in the leaderboards page. Click on each players name to display their 
+            personal match history and elo rating changes. 
+        </p>
+        <br />
+        <h5>Scheduling Games</h5>
+        <hr />
+        <p>Games can be scheduled ahead of time using the scheduler feature. An email notification will be sent to the scheduled players
+            and the game will appear on the "Upcoming games" box in the home page. 
+        </p>
+    </div>
 {% endblock content %}

@@ -38,54 +38,53 @@
 
 
 {% block content %}
-
+<h3>{{Game.title}} Leaderboard</h3>
+<hr />
 <div class="content-section">
-    <h1 style="text-align: center;">Rating distribution</h1>
+    <h4 style="text-align: center;">Rating distribution</h4>
     <svg class="main-vis" id="visualization" height="200" width="100%"></svg>
     <script>distributionGraph({{ JSData }}, "#visualization")</script>
 </div>
 
-<div class="content-section">
-    <table style="width: 100%">
-        <thread>
+<table class="table table-hover table-sm table-bordered" style="width: 100%">
+    <thead class="thead-light">
+        <tr>
+            <th title="Player position" style="text-align: initial;"><span style="font-weight: bold">Rank</span></th>
+            <th title="Player name" style="text-align: initial; width: 30%;"><span style="font-weight: bold">Player</span></th>
+            <th title="Player's current rating"><span style="font-weight: bold">Rating</span></th>
+            <th title="Rating change over the last 3 games"><span style="font-weight: bold">Recent</span></th>
+            <th title="Player's total wins"><span style="font-weight: bold">Wins</span></th>
+            <th title="Player's total losses"><span style="font-weight: bold">Losses</span></th>
+        </tr>
+    </thead>
+
+    {% if Ratings %}
+        {% for rating in Ratings %}
             <tr>
-                <th title="Player position" style="text-align: initial;"><span style="font-weight: bold"></span></th>
-                <th title="Player name" style="text-align: initial; width: 30%;"><span style="font-weight: bold">Player</span></th>
-                <th title="Player's current rating"><span style="font-weight: bold">Rating</span></th>
-                <th title="Rating change over the last 3 games"><span style="font-weight: bold">Recent</span></th>
-                <th title="Player's total wins"><span style="font-weight: bold">Wins</span></th>
-                <th title="Player's total losses"><span style="font-weight: bold">Losses</span></th>
-            </tr>
-        </thread>
-
-        {% if Ratings %}
-            {% for rating in Ratings %}
-                <tr>
-                    <th>{{rating.position}}</th>
-                    <th class="thName"><a href="{% url 'stats-leaderboard-rating' object.slug rating.url %}">{{rating.player.username}}</a></th>
-                    <th>{% if rating.expose %} {{ rating.expose|floatformat:0 }} {% else %}0{% endif %}</th>
-                    {% if rating.recent %}
-                        {% if rating.recent > 0 %}
-                            <th class="thPositive">+{{ rating.recent|floatformat:0}}</th>
-                        {% elif rating.recent < 0 %}
-                            <th class="thNegative">{{ rating.recent|floatformat:0}}</th>
-                        {% else %}
-                            <th>{{ rating.recent }}</th>
-                        {% endif %}
+                <th>{{rating.position}}</th>
+                <th class="thName"><a href="{% url 'stats-leaderboard-rating' object.slug rating.url %}">{{rating.player.username}}</a></th>
+                <th>{% if rating.expose %} {{ rating.expose|floatformat:0 }} {% else %}0{% endif %}</th>
+                {% if rating.recent %}
+                    {% if rating.recent > 0 %}
+                        <th class="thPositive">+{{ rating.recent|floatformat:0}}</th>
+                    {% elif rating.recent < 0 %}
+                        <th class="thNegative">{{ rating.recent|floatformat:0}}</th>
                     {% else %}
-                        <th>0</th>
+                        <th>{{ rating.recent }}</th>
                     {% endif %}
+                {% else %}
+                    <th>0</th>
+                {% endif %}
 
-                    <th>{% if rating.wins %}{{rating.wins}}{% else %}0{% endif %}</th>
-                    <th>{% if rating.losses %}{{rating.losses}}{% else %}0{% endif %}</th>
+                <th>{% if rating.wins %}{{rating.wins}}{% else %}0{% endif %}</th>
+                <th>{% if rating.losses %}{{rating.losses}}{% else %}0{% endif %}</th>
 
-                </tr>
-            {% endfor %}
-        {% else %}
+            </tr>
+        {% endfor %}
+    {% else %}
 
-        {% endif %}
-            
-    </table>
-</div>
+    {% endif %}
+        
+</table>
 
 {% endblock content %}
