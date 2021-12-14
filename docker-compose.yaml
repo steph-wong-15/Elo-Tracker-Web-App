@@ -17,6 +17,7 @@ services:
       - db-net
 
   elotracker-app:
+    restart: always
     container_name: EloTracker-app
     build:
       context: .
