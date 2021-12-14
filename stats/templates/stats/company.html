@@ -16,7 +16,11 @@
                             <h5 class="text-secondary">Invite Code:  {{ company.invite_code}}</h5>
                         </div>
                     </div>
-                    <p class="text-secondary">Admin: {{ company.admins.username }}</p>
+                    <p class="text-secondary">admins:                     
+                        {% for admin in admins %}
+                            {{admin}}
+                        {% endfor %}
+                    </p>
                     <hr />
                     <h6>Registered Users: {{users|length}} </h6>
                     <div class="container">
@@ -29,13 +33,23 @@
                     
                 </div>
             </div>
+            {% if isAdmin %}
+            <form method="POST">
+                    {% csrf_token %}
+                <div style="padding: 16px;" class="media-body">
+                    <h6>Promote user to admin</h6>
+                    {{adminForm}}
+                    <input class="btn btn-outline-secondary" name="promoteUser" type="submit"></input>
+                </div>
+            </form>
+            {% endif %}
 
     {% else %}
     <div class="row mb-3">
         <div class="col text-center">
             <h2>You are not registered with a company</h2>
         <form method="POST">
-            {% csrf_token %}
+        {% csrf_token %}
             <div style="padding: 16px;">
                 {{form}}
                 <button class="btn btn-outline-secondary" type="submit">Sign up</a>

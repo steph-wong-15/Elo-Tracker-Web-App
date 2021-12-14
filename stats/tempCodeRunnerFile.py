@@ -1,0 +1,1 @@
+        fields = ['title', 'company', 'image']
