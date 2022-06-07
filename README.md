@@ -1,7 +1,7 @@
 ## Stats-Website
 This application is a elo tracker to track player elo rating for company/office games. This app was creating using Django for both the frontend and backend. 
 
-## Run using Dockeer
+## Run using Docker
 1. docker-compose build
 2. docker-compose up
 
